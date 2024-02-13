@@ -36,7 +36,10 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
         .open("/root/machinelog.csv")?
         .pipe(csv::Writer::from_writer)
         .serialize(record)
-        .map_err(|_| io::ErrorKind::Other.into())
+        .map_err(|err| {
+            println!("serialization error: {}", err);
+            io::ErrorKind::Other.into()
+        })
 }
 
 pub fn log_debug(topic: &str, payload: &str, result: Result<(), &str>) -> io::Result<()> {
