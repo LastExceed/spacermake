@@ -61,6 +61,6 @@ fn get_slave_topic(machine: &str) -> String {
     if SLAVE_PROPERTIES[machine][2] {
         format!("cmnd/{machine}/Power")
     } else {
-        format!("shellies/{machine}/relay/0")
+        format!("shellies/{machine}/relay/0/command")
     }
 }
