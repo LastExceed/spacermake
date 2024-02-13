@@ -1,5 +1,6 @@
 use std::time::{Duration, Instant};
 
+use colour::{blue_ln, red_ln};
 use futures::join;
 use futures::future::join_all;
 use rumqttc::QoS;
@@ -32,8 +33,10 @@ impl State<Announcer> {
                     return None;
                 }
 
+                blue_ln!("updating display of {machine}");
+
                 let Some(id) = MACHINE_IDS.get(machine) else {
-                    println!("error: no ID found for {machine}");
+                    red_ln!("error: no ID found for {machine}");
                     return None;
                 };
 
@@ -65,8 +68,9 @@ impl State<Announcer> {
             if time > &now {
                 break;
             }
+            blue_ln!("performing scheduled shutdown of {machine}");
 
-            self.update_power_state(machine, false).await;
+            self.set_power_state(machine, false).await;
             schedule.pop_front();
         }
     }

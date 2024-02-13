@@ -3,12 +3,13 @@ use std::io::{self, Write};
 use std::fs::File;
 
 use chrono::Local;
+use colour::red_ln;
 use serde::Serialize;
 use tap::Pipe;
 
 use crate::utils::booking::Booking;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 struct Record<'s> {
     machine: &'s str,
     date: String,
@@ -34,19 +35,19 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
         .append(true)
         .open("/root/machinelog.csv")?
         .pipe(csv::Writer::from_writer)
-        .serialize(record)
-        .map_err(|err| {
-            println!("serialization error: {}", err);
+        .serialize(&record)
+        .map_err(|error| {
+            red_ln!("error while serializing: {error}\n{record:#?}");
             io::ErrorKind::Other.into()
         })
 }
 
 pub fn log_debug(topic: &str, payload: &str, result: Result<(), &str>) -> io::Result<()> {
     if let Err(error) = result {
-        println!("error: {error}");
-        println!("	topic: {topic}");
-        println!("	payload: {payload}");
-        println!()
+        red_ln!("error: {error}");
+        red_ln!("	topic: {topic}");
+        red_ln!("	payload: {payload}");
+        red_ln!()
     }
 
     let time = Local::now().to_string();

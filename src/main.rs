@@ -1,6 +1,7 @@
 use std::time::Duration;
 use std::collections::{HashMap, HashSet};
 
+use colour::{green_ln, magenta_ln, yellow_ln};
 use lazy_static::*;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use state::{Announcer, Listener, State};
@@ -32,13 +33,24 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
+	magenta_ln!("===== spacermake =====");
+	print_config();
 	let (client, event_loop) = create_client().await;
-
+	magenta_ln!("start");
 	let listener = State::new(Listener, client);
 	let announcer = listener.duplicate_as(Announcer);
 
 	tokio::spawn(announcer.run());
 	listener.run(event_loop).await;
+}
+
+fn print_config() {
+	let slaves_by_master: &HashMap<_, _> = &SLAVES_BY_MASTER;
+	let slave_properties: &HashMap<_, _> = &SLAVE_PROPERTIES;
+	let machine_ids: &HashMap<_, _> = &MACHINE_IDS;
+	yellow_ln!("{slaves_by_master:#?}");
+	green_ln!("{slave_properties:#?}");
+	yellow_ln!("{machine_ids:#?}");
 }
 
 async fn create_client() -> (AsyncClient, EventLoop) {

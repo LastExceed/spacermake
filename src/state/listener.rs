@@ -2,6 +2,7 @@ use std::ops::Sub;
 use std::time::{Duration, Instant};
 
 use boolinator::Boolinator;
+use colour::{cyan_ln, dark_grey_ln, red_ln};
 use rumqttc::EventLoop;
 use rumqttc::Event::Incoming;
 use rumqttc::Packet::Publish;
@@ -21,20 +22,17 @@ impl State<Listener> {
                 .expect("notification error")
                 else { continue };
 
+            dark_grey_ln!("publish received");
             self.on_publish(publish).await;
         }
     }
 
     async fn on_publish(&mut self, publish: rumqttc::Publish) {
-        //pretty ugly, cant figure out a clean way to do this
-        let Ok(payload) = String::from_utf8(publish.payload.clone().into())
-            else {
-                log_debug(&publish.topic, &format!("{:?}", &publish.payload), Err("non-utf8 payload"))
-                    .expect("debug log failed");
-
-                return;
-            };
-        //end of ugly
+        let Ok(payload) = String::from_utf8(publish.payload.clone().into()) else {
+            red_ln!("publish with non-utf8 payload received - {:?}", publish.payload);
+            return;
+        };
+        dark_grey_ln!("payload: {payload}");
 
         let result = self.handle_payload(&publish.topic, &payload).await;
 
@@ -73,13 +71,14 @@ impl State<Listener> {
             _ => return Ok(()) //ignore other statuses
         }
 
-        println!("info: {user} {status} {machine}");
+        cyan_ln!("{user} {status} {machine}");
 
         Ok(())
     }
 
     #[allow(clippy::ptr_arg)] //false positive
     async fn try_book(&mut self, machine: &String, user: &String) -> Result<(), &'static str> {
+        dark_grey_ln!("booking {machine}");
         let mut bookings = self.bookings.write().await;
         if bookings.contains_key(machine) {
             return Err("machine got double-booked");
@@ -90,6 +89,7 @@ impl State<Listener> {
     }
 
     async fn try_release(&mut self, machine: &String) -> Result<(), &'static str> {
+        dark_grey_ln!("releasing {machine}");
         let mut booking = self
             .bookings
             .write()
@@ -126,12 +126,13 @@ impl State<Listener> {
 
         self.update_slaves(machine, true, false, power).await?;
 
-        println!("info: {machine} got turned {power_string}");
+        cyan_ln!("info: {machine} got turned {power_string}");
 
         Ok(())
     }
 
     pub async fn update_slaves(&mut self, master: &String, short_slaves: bool, long_slaves: bool, power: bool) -> Result<(), &'static str> {
+        dark_grey_ln!("updating slaves...");
         let slaves_used_by_others = self
             .bookings
             .read()
@@ -151,12 +152,13 @@ impl State<Listener> {
 
         for slave in slaves_to_update {
             if !power && SLAVE_PROPERTIES[&slave][index::NEEDS_TRAILING_TIME] {
+                dark_grey_ln!("scheduling delayed shutdown for {}", slave);
                 let shutdown_timestamp = Instant::now() + Duration::from_secs(30);
                 self.scheduled_shutdowns.write().await.push_back((shutdown_timestamp, slave));
                 continue;
             }
 
-            self.update_power_state(&slave, power).await;
+            self.set_power_state(&slave, power).await;
         }
 
         Ok(())

@@ -2,6 +2,7 @@ use std::time::Instant;
 use std::sync::Arc;
 use std::collections::{HashMap, VecDeque};
 
+use colour::dark_grey_ln;
 use rumqttc::{AsyncClient, QoS};
 use tokio::sync::RwLock;
 
@@ -43,7 +44,8 @@ impl<Kind> State<Kind> {
     }
 
     //probably doesn't belong here, dunno where else to put it
-    async fn update_power_state(&self, machine: &str, new_state: bool) {
+    async fn set_power_state(&self, machine: &str, new_state: bool) {
+        dark_grey_ln!("set power state - {machine} {new_state}");
         let is_tasmota = SLAVE_PROPERTIES[machine][index::IS_TASMOTA];
         let topic =
             if is_tasmota {
@@ -60,6 +62,7 @@ impl<Kind> State<Kind> {
                 if new_state { b"on".as_slice() } else { b"off".as_slice() }
             };
 
+        dark_grey_ln!("publishing\n  topic: {topic}\n  payload: {payload:?}");
         self.client
             .read()
             .await
