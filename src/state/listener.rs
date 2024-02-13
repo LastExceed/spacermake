@@ -138,7 +138,7 @@ impl State<Listener> {
             .read()
             .await
             .iter()
-            .filter(|(_, booking)| booking.is_running())
+            .filter(|(other, booking)| *other != master && booking.is_running())
             .flat_map(|(machine, _)| &SLAVES_BY_MASTER[machine]) //todo: error handing
             .cloned()
             .collect();
