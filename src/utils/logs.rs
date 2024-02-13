@@ -4,6 +4,7 @@ use std::fs::File;
 
 use chrono::Local;
 use colour::red_ln;
+use csv::WriterBuilder;
 use serde::Serialize;
 use tap::Pipe;
 
@@ -31,10 +32,13 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
         user: &booking.user
     };
 
-    File::options()
+    let file_writer = File::options()
         .append(true)
-        .open("/root/machinelog.csv")?
-        .pipe(csv::Writer::from_writer)
+        .open("/root/machinelog.csv")?;
+
+    WriterBuilder::new()
+        .has_headers(false)
+        .from_writer(file_writer)
         .serialize(&record)
         .map_err(|error| {
             red_ln!("error while serializing: {error}\n{record:#?}");
