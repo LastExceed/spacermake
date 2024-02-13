@@ -6,7 +6,6 @@ use chrono::Local;
 use colour::red_ln;
 use csv::WriterBuilder;
 use serde::Serialize;
-use tap::Pipe;
 
 use crate::utils::booking::Booking;
 
