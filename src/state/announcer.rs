@@ -66,7 +66,7 @@ impl State<Announcer> {
                 break;
             }
 
-            self.update_power_state(&machine, false).await;
+            self.update_power_state(machine, false).await;
             schedule.pop_front();
         }
     }

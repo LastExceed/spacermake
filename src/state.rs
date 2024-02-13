@@ -43,24 +43,27 @@ impl<Kind> State<Kind> {
 
     //probably doesn't belong here, dunno where else to put it
     async fn update_power_state(&self, machine: &str, new_state: bool) {
+        let is_tasmota = SLAVE_PROPERTIES[machine][2];
+        let topic =
+            if is_tasmota {
+                format!("cmnd/{machine}/Power")
+            } else {
+                format!("shellies/{machine}/relay/0/command")
+            };
+
+        #[allow(clippy::collapsible_else_if)]
+        let payload =
+            if is_tasmota {
+                if new_state { b"ON".as_slice() } else { b"OFF".as_slice() }
+            } else {
+                if new_state { b"on".as_slice() } else { b"off".as_slice() }
+            };
+
         self.client
             .read()
             .await
-            .publish(
-                get_slave_topic(machine),
-                QoS::AtMostOnce,
-                false,
-                if new_state { b"ON".as_slice() } else { b"OFF".as_slice() }
-            )
+            .publish(topic, QoS::AtMostOnce, false, payload)
             .await
             .expect("failed to publish");
-    }
-}
-
-fn get_slave_topic(machine: &str) -> String {
-    if SLAVE_PROPERTIES[machine][2] {
-        format!("cmnd/{machine}/Power")
-    } else {
-        format!("shellies/{machine}/relay/0/command")
     }
 }
