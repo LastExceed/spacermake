@@ -1,7 +1,7 @@
 use std::time::Duration;
 use std::collections::{HashMap, HashSet};
 
-use colour::{green_ln, magenta_ln, yellow_ln};
+use colour::{dark_grey_ln, magenta_ln};
 use lazy_static::*;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use state::{Announcer, Listener, State};
@@ -48,9 +48,7 @@ fn print_config() {
 	let slaves_by_master: &HashMap<_, _> = &SLAVES_BY_MASTER;
 	let slave_properties: &HashMap<_, _> = &SLAVE_PROPERTIES;
 	let machine_ids: &HashMap<_, _> = &MACHINE_IDS;
-	yellow_ln!("{slaves_by_master:#?}");
-	green_ln!("{slave_properties:#?}");
-	yellow_ln!("{machine_ids:#?}");
+	dark_grey_ln!("{slaves_by_master:#?}{slave_properties:#?}{machine_ids:#?}");
 }
 
 async fn create_client() -> (AsyncClient, EventLoop) {
