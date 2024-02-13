@@ -33,7 +33,7 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
 
     File::options()
         .append(true)
-        .open("/root/machinelog")?
+        .open("/root/machinelog.csv")?
         .pipe(csv::Writer::from_writer)
         .serialize(record)
         .map_err(|_| io::ErrorKind::Other.into())
