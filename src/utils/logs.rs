@@ -16,7 +16,7 @@ struct Record<'s> {
     time_booked: String,
     time_released: String,
     booking_duration: i32, //minutes
-    runtime: Duration, //minutes
+    runtime: i32, //minutes
     user: &'s str
 }
 
@@ -27,7 +27,7 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
         time_booked: booking.creation_datetime.time().to_string(),
         time_released: Local::now().time().to_string(),
         booking_duration: booking.creation_instant.elapsed().as_secs_f32().div(60.0).ceil() as _,
-        runtime: booking.total_runtime(),
+        runtime: booking.total_runtime().as_secs_f32().div(60.0).ceil() as _,
         user: &booking.user
     };
 
