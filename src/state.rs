@@ -5,6 +5,7 @@ use std::collections::{HashMap, VecDeque};
 use rumqttc::{AsyncClient, QoS};
 use tokio::sync::RwLock;
 
+use crate::utils::index;
 use crate::utils::booking::Booking;
 use crate::SLAVE_PROPERTIES;
 
@@ -43,7 +44,7 @@ impl<Kind> State<Kind> {
 
     //probably doesn't belong here, dunno where else to put it
     async fn update_power_state(&self, machine: &str, new_state: bool) {
-        let is_tasmota = SLAVE_PROPERTIES[machine][2];
+        let is_tasmota = SLAVE_PROPERTIES[machine][index::IS_TASMOTA];
         let topic =
             if is_tasmota {
                 format!("cmnd/{machine}/Power")

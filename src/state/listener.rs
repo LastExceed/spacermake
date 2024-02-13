@@ -7,6 +7,7 @@ use rumqttc::Event::Incoming;
 use rumqttc::Packet::Publish;
 
 use crate::{State, Listener, BOOKING_TOPIC, SLAVES_BY_MASTER, SLAVE_PROPERTIES};
+use crate::utils::index;
 use crate::utils::get_power_state;
 use crate::utils::logs::{log_debug, machinelog};
 use crate::utils::booking::Booking;
@@ -146,10 +147,10 @@ impl State<Listener> {
             .ok_or("unknown master")?
             .sub(&slaves_used_by_others)
             .into_iter()
-            .filter(|slave| if SLAVE_PROPERTIES[slave][0] { long_slaves } else { short_slaves });
+            .filter(|slave| if SLAVE_PROPERTIES[slave][index::RUNS_CONTINUOUSLY] { long_slaves } else { short_slaves });
 
         for slave in slaves_to_update {
-            if !power && SLAVE_PROPERTIES[&slave][1] {
+            if !power && SLAVE_PROPERTIES[&slave][index::NEEDS_TRAILING_TIME] {
                 let shutdown_timestamp = Instant::now() + Duration::from_secs(30);
                 self.scheduled_shutdowns.write().await.push_back((shutdown_timestamp, slave));
                 continue;

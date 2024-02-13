@@ -5,6 +5,7 @@ use serde::de::DeserializeOwned;
 
 pub mod logs;
 pub mod booking;
+pub mod index;
 
 pub fn parse_toml_file<T: DeserializeOwned>(path: &str) -> T {
     let file_content = fs::read_to_string(path).expect("failed to read .toml file");
