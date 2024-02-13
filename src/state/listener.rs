@@ -151,16 +151,38 @@ impl State<Listener> {
             .filter(|slave| if SLAVE_PROPERTIES[slave][index::RUNS_CONTINUOUSLY] { long_slaves } else { short_slaves });
 
         for slave in slaves_to_update {
-            if !power && SLAVE_PROPERTIES[&slave][index::NEEDS_TRAILING_TIME] {
-                dark_grey_ln!("scheduling delayed shutdown for {}", slave);
-                let shutdown_timestamp = Instant::now() + Duration::from_secs(30);
-                self.scheduled_shutdowns.write().await.push_back((shutdown_timestamp, slave));
-                continue;
+            if SLAVE_PROPERTIES[&slave][index::NEEDS_TRAILING_TIME] {
+                if power {
+                    self.cancel_scheduled_shutdown(&slave).await;
+                } else {
+                    self.schedule_shutdown(slave).await;
+                    continue;
+                }
             }
 
             self.set_power_state(&slave, power).await;
         }
 
         Ok(())
+    }
+
+    async fn schedule_shutdown(&self, slave: String) {
+        dark_grey_ln!("scheduling delayed shutdown for {}", slave);
+
+        let shutdown_timestamp = Instant::now() + Duration::from_secs(30);
+
+        self.scheduled_shutdowns
+            .write()
+            .await
+            .push_back((shutdown_timestamp, slave));
+    }
+
+    async fn cancel_scheduled_shutdown(&self, slave: &String) {
+        let mut schedule = self.scheduled_shutdowns.write().await;
+
+        if let Some(index) = schedule.iter().position(|(_, name)| name == slave) {
+            dark_grey_ln!("cancelling scheduling shutdown for {}", slave);
+            schedule.remove(index);
+        }
     }
 }
