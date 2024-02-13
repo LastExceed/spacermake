@@ -1,4 +1,3 @@
-use std::time::Duration;
 use std::ops::Div;
 use std::io::{self, Write};
 use std::fs::File;
