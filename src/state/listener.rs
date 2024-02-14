@@ -97,11 +97,11 @@ impl State<Listener> {
             .remove(machine)
             .ok_or("released unbooked machine")?;
 
-        let was_running = booking.track(false);
-        self.update_slaves(machine, was_running, true, false).await?;
-
         machinelog(machine, &booking)
             .expect("machine log failed");
+
+        let was_running = booking.track(false);
+        self.update_slaves(machine, was_running, true, false).await?;
 
         Ok(())
     }
@@ -124,9 +124,9 @@ impl State<Listener> {
             .track(power)
             .as_result((), err)?;
 
-        self.update_slaves(machine, true, false, power).await?;
-
         cyan_ln!("info: {machine} got turned {power_string}");
+
+        self.update_slaves(machine, true, false, power).await?;
 
         Ok(())
     }
