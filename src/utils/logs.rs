@@ -45,6 +45,13 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
         })
 }
 
+pub fn log_start() -> io::Result<()> {
+    File::options()
+        .append(true)
+        .open("/root/machinelog_debug.csv")?
+        .write_all(format!("\n\n===== startup {} =====\n\n", Local::now()).as_bytes())
+}
+
 pub fn log_debug(topic: &str, payload: &str, result: Result<(), &str>) -> io::Result<()> {
     if let Err(error) = result {
         red_ln!("error: {error}");

@@ -8,6 +8,8 @@ use state::{Announcer, Listener, State};
 
 use utils::parse_toml_file;
 
+use crate::utils::logs::log_start;
+
 mod state;
 mod utils;
 
@@ -34,6 +36,7 @@ lazy_static! {
 #[tokio::main]
 async fn main() {
 	magenta_ln!("===== spacermake =====");
+	log_start().expect("startup log failed");
 	print_config();
 	let (client, event_loop) = create_client().await;
 	magenta_ln!("start");
