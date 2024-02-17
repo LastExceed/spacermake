@@ -1,4 +1,4 @@
-use std::ops::Sub;
+use std::{collections::HashSet, ops::Sub};
 use std::time::{Duration, Instant};
 
 use boolinator::Boolinator;
@@ -133,13 +133,16 @@ impl State<Listener> {
 
     pub async fn update_slaves(&mut self, master: &String, short_slaves: bool, long_slaves: bool, power: bool) -> Result<(), &'static str> {
         dark_grey_ln!("updating slaves...");
+
+        let fallback = HashSet::new();
+
         let slaves_used_by_others = self
             .bookings
             .read()
             .await
             .iter()
             .filter(|(other, booking)| *other != master && booking.is_running())
-            .flat_map(|(machine, _)| &SLAVES_BY_MASTER[machine]) //todo: error handing
+            .flat_map(|(machine, _)| SLAVES_BY_MASTER.get(machine).unwrap_or(&fallback)) //machine being unknown already got logged when it got turned on, so we can ignore it here
             .cloned()
             .collect();
 
