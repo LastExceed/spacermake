@@ -32,7 +32,7 @@ impl Booking {
             self.runtime_accumulator += self
                 .currently_running_since
                 .take()
-                .unwrap()
+                .unwrap() //SAFETY: guaranteed by .is_running()
                 .elapsed();
         }
 
