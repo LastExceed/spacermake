@@ -34,14 +34,11 @@ pub fn minute_mark(duration: Duration) -> bool {
     duration.as_secs() % 60 == 0
 }
 
-pub fn create_display_update_message(runtime: Duration) -> String {
+pub fn create_display_time_string(runtime: Duration) -> String {
     let hours = runtime.as_secs() / 3600;
     let minutes = runtime.as_secs() / 60 % 60;
 
     json::object! {
-        Cmd: "message",
-        MssgID: 12,
-        ClrTxt: "Nutzungsdauer",
         AddnTxt: format!("{hours:.0}:{minutes:0>2.0}")
     }.to_string()
 }

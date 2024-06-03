@@ -8,7 +8,7 @@ use tap::Pipe;
 use tokio::time::sleep;
 
 use crate::MACHINE_IDS;
-use crate::utils::{create_display_update_message, minute_mark};
+use crate::utils::{create_display_time_string, minute_mark};
 use crate::{Announcer, State};
 
 impl State<Announcer> {
@@ -48,17 +48,24 @@ impl State<Announcer> {
     }
 
     async fn update_runtime_display(&self, machine_id: &str, runtime: Duration) {
-        self.client
-            .read()
-            .await
-            .publish(
-                format!("/cmnd/reader/{machine_id}"),
-                QoS::AtMostOnce,
-                false,
-                create_display_update_message(runtime)
-            )
-            .await
-            .expect("failed to publish display update");
+        let client = self.client.read().await;
+
+        let messages = [
+            ("title", "Dauer".into()),
+            ("info", create_display_time_string(runtime)),
+        ];
+
+        for (route, payload) in messages {
+            client
+                .publish(
+                    format!("fabreader/{machine_id}/display/{route}"),
+                    QoS::AtMostOnce,
+                    false,
+                    payload
+                )
+                .await
+                .expect("failed to publish display update");
+        }
     }
 
     async fn perform_scheduled_shutdowns(&self) {
