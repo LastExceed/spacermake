@@ -38,7 +38,5 @@ pub fn create_display_time_string(runtime: Duration) -> String {
     let hours = runtime.as_secs() / 3600;
     let minutes = runtime.as_secs() / 60 % 60;
 
-    json::object! {
-        AddnTxt: format!("{hours:.0}:{minutes:0>2.0}")
-    }.to_string()
+    format!("{hours:.0}:{minutes:0>2.0}")
 }
