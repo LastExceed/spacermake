@@ -35,8 +35,13 @@ pub fn minute_mark(duration: Duration) -> bool {
 }
 
 pub fn create_display_time_string(runtime: Duration) -> String {
-    let hours = runtime.as_secs() / 3600;
-    let minutes = runtime.as_secs() / 60 % 60;
+    let mut total_minutes = runtime.as_secs() / 60;
+    if !runtime.is_zero() {
+        total_minutes += 1; //workaround so partial minutes get rounded up instead of down
+    }
+
+    let hours = total_minutes / 60;
+    let minutes = total_minutes % 60;
 
     format!("{hours:.0}:{minutes:0>2.0}")
 }
