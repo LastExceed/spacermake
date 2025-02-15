@@ -141,8 +141,14 @@ impl State<Listener> {
             .read()
             .await
             .iter()
-            .filter(|(other, booking)| *other != master && booking.is_running())
-            .flat_map(|(machine, _)| SLAVES_BY_MASTER.get(machine).unwrap_or(&fallback)) //machine being unknown already got logged when it got turned on, so we can ignore it here
+            .filter(|(other, _booking)| *other != master)
+            .flat_map(|(machine, booking)|
+                SLAVES_BY_MASTER
+                    .get(machine)
+                    .unwrap_or(&fallback) // machine being unknown already got logged when it got turned on, so we can ignore it here
+                    .iter()
+                    .filter(|slave| booking.is_running() || SLAVE_PROPERTIES[*slave][index::RUNS_CONTINUOUSLY])
+            )
             .cloned()
             .collect();
 
