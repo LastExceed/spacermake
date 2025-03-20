@@ -32,6 +32,7 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
     };
 
     let file_writer = File::options()
+        .create(true)
         .append(true)
         .open("/root/machinelog.csv")?;
 
@@ -47,6 +48,7 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
 
 pub fn log_start() -> io::Result<()> {
     File::options()
+        .create(true)
         .append(true)
         .open("/root/machinelog_debug.csv")?
         .write_all(format!("\n\n===== startup {} =====\n\n", Local::now()).as_bytes())

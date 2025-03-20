@@ -1,15 +1,26 @@
 use std::fs;
+use std::fs::File;
+use std::io::ErrorKind;
 use std::time::Duration;
 
 use serde::de::DeserializeOwned;
+use tap::Pipe;
 
 pub mod logs;
 pub mod booking;
 pub mod index;
 
 pub fn parse_toml_file<T: DeserializeOwned>(path: &str) -> T {
-    let file_content = fs::read_to_string(path).expect("failed to read .toml file");
-    toml::from_str(&file_content).expect("failed to parse toml")
+    match fs::read_to_string(path) {
+        Ok(s) => s,
+        Err(e) if e.kind() == ErrorKind::NotFound => {
+            File::create(path).expect("failed to create file");
+            String::new()
+        },
+        _ => panic!("error reading {path}")
+    }
+        .pipe_as_ref(toml::from_str)
+        .expect("failed to parse toml")
 }
 
 pub fn get_power_state(payload: &str) -> Result<String, &'static str> {
