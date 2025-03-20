@@ -9,6 +9,10 @@ use serde::Serialize;
 
 use crate::utils::booking::Booking;
 
+use self::billing::billinglog;
+
+mod billing;
+
 #[derive(Debug, Serialize)]
 struct Record<'s> {
     machine: &'s str,
@@ -21,6 +25,8 @@ struct Record<'s> {
 }
 
 pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
+    billinglog(machine, booking)?;
+
     let record = Record {
         machine,
         date: booking.creation_datetime.date_naive().to_string(),
