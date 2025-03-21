@@ -51,7 +51,10 @@ fn print_config() {
 	let slaves_by_master: &HashMap<_, _> = &SLAVES_BY_MASTER;
 	let slave_properties: &HashMap<_, _> = &SLAVE_PROPERTIES;
 	let machine_ids: &HashMap<_, _> = &MACHINE_IDS;
-	dark_grey_ln!("{slaves_by_master:#?}{slave_properties:#?}{machine_ids:#?}");
+	
+	let data_machine: &HashMap<_, _> = &utils::logs::billing::DATA_MACHINES;
+	let data_user: &HashMap<_, _> = &utils::logs::billing::DATA_USER;
+	dark_grey_ln!("{slaves_by_master:#?}{slave_properties:#?}{machine_ids:#?}{data_machine:#?}{data_user:#?}");
 }
 
 async fn create_client() -> (AsyncClient, EventLoop) {

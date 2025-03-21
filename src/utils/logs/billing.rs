@@ -11,29 +11,38 @@ use serde::Serialize;
 
 use crate::utils::booking::Booking; 
 
-struct MachineData {
-    id: i32,
+#[derive(Debug, Clone)]
+pub struct UserData {
+    id: Option<i32>,
+    to_be_used: bool
+}
+
+#[derive(Debug, Clone)]
+pub struct MachineData {
+    id: Option<i32>,
     to_be_used: bool,
     power_sense: bool,
     divider: i32
 }
 
 lazy_static! {
-    static ref DATA_USER: HashMap<String, String> = fs::read_to_string("DataUser.csv")
+    pub static ref DATA_USER: HashMap<String, UserData> = fs::read_to_string("DataUser.csv")
         .expect("failed to open DataUser.csv")
         .lines()
         .map(|line| {
-            let (name, id) = line
-                .split_once(',')
-                .unwrap();
+            let mut splits = line.split(',');
             
-            (
-                name.to_string(),
-                id.to_string()
-            )
+            let name = splits.next().unwrap().to_string();
+
+            let ud = UserData {
+                id        : splits.next().unwrap().parse       ().ok(),
+                to_be_used: splits.next().unwrap().parse::<i32>().unwrap_or(1) == 1,
+            };
+            
+            (name, ud)
         })
         .collect();
-    static ref DATA_MACHINES: HashMap<String, MachineData> = fs::read_to_string("DataMachines.csv")
+    pub static ref DATA_MACHINES: HashMap<String, MachineData> = fs::read_to_string("DataMachines.csv")
         .expect("failed to open DataMachines.csv")
         .lines()
         .map(|line| {
@@ -41,9 +50,9 @@ lazy_static! {
             
             let name = splits.next().unwrap().to_string();
             let md = MachineData {
-                id         : splits.next().unwrap().parse       ().unwrap(),
-                to_be_used : splits.next().unwrap().parse::<i32>().unwrap() == 1,
-                power_sense: splits.next().unwrap().parse::<i32>().unwrap() == 1,
+                id         : splits.next().unwrap().parse       ().ok(),
+                to_be_used : splits.next().unwrap().parse::<i32>().unwrap_or(1) == 1,
+                power_sense: splits.next().unwrap().parse::<i32>().unwrap()     == 1,
                 divider    : splits.next().unwrap().parse       ().unwrap()
             };
             
@@ -64,23 +73,33 @@ struct BillingRecord {
 }
 
 pub fn billinglog(machine: &str, booking: &Booking) -> io::Result<()> {
-    let machine_data = &DATA_MACHINES
-        .get(&machine.to_string());
-    
-    if !machine_data.is_some_and(|md| !md.to_be_used) {
-        return Ok(());
-    }
+    let user_id =
+        if let Some(user_data) = &DATA_USER.get(&booking.user.to_string()) {
+            if !user_data.to_be_used { return Ok(()); }
+            user_data
+                .id
+                .map(|i| i.to_string())
+                .unwrap_or(booking.user.to_string())
+        } else {
+            booking.user.to_string()
+        };
+        
+    let artikel_id =
+        if let Some(machine_data) = &DATA_MACHINES.get(&machine.to_string()) {
+            if !machine_data.to_be_used { return Ok(()); }
+            machine_data
+                .id
+                .map(|i| i.to_string())
+                .unwrap_or(machine.to_string())
+        } else {
+            machine.to_string()
+        };
     
     let bill = BillingRecord {
-        user_id: DATA_USER
-            .get(&booking.user)
-            .unwrap_or(&booking.user)
-            .clone(),
+        user_id,
         quelle: "allgemeiner Beleg",
         brutto_netto: 2,
-        artikel_id: machine_data
-            .map(|md| md.id.to_string())
-            .unwrap_or(machine.to_string()),
+        artikel_id,
         positionsdetails: Local::now()
             .format("%Y-%m-%d")
             .to_string(),
@@ -96,7 +115,7 @@ pub fn billinglog(machine: &str, booking: &Booking) -> io::Result<()> {
     let file_writer = File::options()
         .create(true)
         .append(true)
-        .open("/root/billinglog.csv")?;
+        .open("billinglog.csv")?;
 
     WriterBuilder::new()
         .has_headers(false)

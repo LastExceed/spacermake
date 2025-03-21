@@ -11,7 +11,7 @@ use crate::utils::booking::Booking;
 
 use self::billing::billinglog;
 
-mod billing;
+pub mod billing;
 
 #[derive(Debug, Serialize)]
 struct Record<'s> {
@@ -40,7 +40,7 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
     let file_writer = File::options()
         .create(true)
         .append(true)
-        .open("/root/machinelog.csv")?;
+        .open("machinelog.csv")?;
 
     WriterBuilder::new()
         .has_headers(false)
@@ -56,7 +56,7 @@ pub fn log_start() -> io::Result<()> {
     File::options()
         .create(true)
         .append(true)
-        .open("/root/machinelog_debug.csv")?
+        .open("machinelog_debug.csv")?
         .write_all(format!("\n\n===== startup {} =====\n\n", Local::now()).as_bytes())
 }
 
@@ -80,6 +80,6 @@ result:  {result}",
 
     File::options()
         .append(true)
-        .open("/root/machinelog_debug.csv")?
+        .open("machinelog_debug.csv")?
         .write_all(record.as_bytes())
 }
