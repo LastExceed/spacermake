@@ -18,6 +18,7 @@ pub struct Listener;
 pub struct Announcer;
 
 pub struct State<Kind> {
+    #[expect(dead_code, reason = "like PhantomData")]
     pub kind: Kind,
     pub client: Arc<RwLock<AsyncClient>>,
     pub bookings: Arc<RwLock<HashMap<String, Booking>>>,
