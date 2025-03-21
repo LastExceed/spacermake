@@ -21,7 +21,7 @@ pub struct UserData {
 pub struct MachineData {
     id: Option<i32>,
     to_be_used: bool,
-    power_sense: bool,
+    power_sense: bool, //1 = runtime, 0 = booked time
     divider: i32
 }
 
@@ -84,16 +84,33 @@ pub fn billinglog(machine: &str, booking: &Booking) -> io::Result<()> {
             booking.user.to_string()
         };
         
-    let artikel_id =
-        if let Some(machine_data) = &DATA_MACHINES.get(&machine.to_string()) {
-            if !machine_data.to_be_used { return Ok(()); }
-            machine_data
-                .id
-                .map(|i| i.to_string())
-                .unwrap_or(machine.to_string())
+    let machine_data = &DATA_MACHINES
+        .get(&machine.to_string())
+        .unwrap_or(&MachineData {
+            id: None,
+            to_be_used: true,
+            power_sense: true,
+            divider: 1
+        });
+        
+    if !machine_data.to_be_used { return Ok(()); }
+    
+    let artikel_id = machine_data
+        .id
+        .map(|i| i.to_string())
+        .unwrap_or(machine.to_string());
+    
+    let anzahl =
+        if machine_data.power_sense {
+            booking.total_runtime()
         } else {
-            machine.to_string()
-        };
+            booking.creation_instant.elapsed()
+        }
+        .as_secs_f32()
+        .div(60.0)
+        .div(machine_data.divider as f32)
+        .ceil()
+        as _;
     
     let bill = BillingRecord {
         user_id,
@@ -103,12 +120,7 @@ pub fn billinglog(machine: &str, booking: &Booking) -> io::Result<()> {
         positionsdetails: Local::now()
             .format("%Y-%m-%d")
             .to_string(),
-        anzahl: booking
-            .total_runtime()
-            .as_secs_f32()
-            .div(60.0)
-            .ceil()
-            as _,
+        anzahl,
         rechnungstyp: 0,
     };
     
