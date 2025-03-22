@@ -1,5 +1,5 @@
-use std::ops::Div;
-use std::io::{self, Write};
+use std::{io::Write, ops::Div};
+use std::io;
 use std::fs::File;
 
 use chrono::Local;
@@ -7,7 +7,7 @@ use colour::red_ln;
 use csv::WriterBuilder;
 use serde::Serialize;
 
-use crate::utils::booking::Booking;
+use crate::{my_config::MyConfig, utils::booking::Booking};
 
 use self::billing::billinglog;
 
@@ -24,8 +24,8 @@ struct Record<'s> {
     user: &'s str
 }
 
-pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
-    billinglog(machine, booking)?;
+pub fn machinelog(machine: &str, booking: &Booking, config: &MyConfig) -> io::Result<()> {
+    billinglog(machine, booking, config)?;
 
     let record = Record {
         machine,
@@ -40,7 +40,7 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
     let file_writer = File::options()
         .create(true)
         .append(true)
-        .open("machinelog.csv")?;
+        .open(&config.machine_log)?;
 
     WriterBuilder::new()
         .has_headers(false)
@@ -52,15 +52,7 @@ pub fn machinelog(machine: &str, booking: &Booking) -> io::Result<()> {
         })
 }
 
-pub fn log_start() -> io::Result<()> {
-    File::options()
-        .create(true)
-        .append(true)
-        .open("machinelog_debug.csv")?
-        .write_all(format!("\n\n===== startup {} =====\n\n", Local::now()).as_bytes())
-}
-
-pub fn log_debug(topic: &str, payload: &str, result: Result<(), &str>) -> io::Result<()> {
+pub fn log_debug(topic: &str, payload: &str, result: Result<(), &str>, config: &MyConfig) -> io::Result<()> {
     if let Err(error) = result {
         red_ln!("error: {error}");
         red_ln!("	topic: {topic}");
@@ -80,6 +72,6 @@ result:  {result}",
 
     File::options()
         .append(true)
-        .open("machinelog_debug.csv")?
+        .open(&config.debug_log)?
         .write_all(record.as_bytes())
 }

@@ -7,7 +7,7 @@ use rumqttc::EventLoop;
 use rumqttc::Event::Incoming;
 use rumqttc::Packet::Publish;
 
-use crate::{State, Listener, BOOKING_TOPIC, SLAVES_BY_MASTER, SLAVE_PROPERTIES};
+use crate::{State, Listener, BOOKING_TOPIC};
 use crate::utils::index;
 use crate::utils::get_power_state;
 use crate::utils::logs::{log_debug, machinelog};
@@ -35,12 +35,12 @@ impl State<Listener> {
         dark_grey_ln!("payload: {payload}");
 
         let result = self.handle_payload(&publish.topic, &payload).await;
-
-        log_debug(&publish.topic, &payload, result)
-            .expect("debug log failed")
+        
+        log_debug(&publish.topic, &payload, result, &self.config)
+            .expect("debug log failed");
     }
 
-    async fn handle_payload(&mut self, topic: &str, payload: &str) -> Result<(), &str> {
+    async fn handle_payload(&mut self, topic: &str, payload: &str) -> Result<(), &'static str> {
         let splits: Result<[_; 3], _> = topic
             .split('/')
             .collect::<Vec<_>>()
@@ -97,7 +97,7 @@ impl State<Listener> {
             .remove(machine)
             .ok_or("released unbooked machine")?;
 
-        machinelog(machine, &booking)
+        machinelog(machine, &booking, &self.config)
             .expect("machine log failed");
 
         let was_running = booking.track(false);
@@ -143,24 +143,27 @@ impl State<Listener> {
             .iter()
             .filter(|(other, _booking)| *other != master)
             .flat_map(|(machine, booking)|
-                SLAVES_BY_MASTER
+                self.config
+                    .slaves_by_master
                     .get(machine)
                     .unwrap_or(&fallback) // machine being unknown already got logged when it got turned on, so we can ignore it here
                     .iter()
-                    .filter(|slave| booking.is_running() || SLAVE_PROPERTIES[*slave][index::RUNS_CONTINUOUSLY])
+                    .filter(|slave| booking.is_running() || self.config.slave_properties[*slave][index::RUNS_CONTINUOUSLY])
             )
             .cloned()
             .collect();
 
-        let slaves_to_update = SLAVES_BY_MASTER
+        let slaves_to_update = self
+            .config
+            .slaves_by_master
             .get(master)
             .ok_or("unknown master")?
             .sub(&slaves_used_by_others)
             .into_iter()
-            .filter(|slave| if SLAVE_PROPERTIES[slave][index::RUNS_CONTINUOUSLY] { long_slaves } else { short_slaves });
+            .filter(|slave| if self.config.slave_properties[slave][index::RUNS_CONTINUOUSLY] { long_slaves } else { short_slaves });
 
         for slave in slaves_to_update {
-            if SLAVE_PROPERTIES[&slave][index::NEEDS_TRAILING_TIME] {
+            if self.config.slave_properties[&slave][index::NEEDS_TRAILING_TIME] {
                 if power {
                     self.cancel_scheduled_shutdown(&slave).await;
                 } else {

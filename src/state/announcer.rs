@@ -7,7 +7,6 @@ use rumqttc::QoS;
 use tap::Pipe;
 use tokio::time::sleep;
 
-use crate::MACHINE_IDS;
 use crate::utils::{create_display_time_string, minute_mark};
 use crate::{Announcer, State};
 
@@ -35,7 +34,7 @@ impl State<Announcer> {
 
                 blue_ln!("updating display of {machine}");
 
-                let Some(id) = MACHINE_IDS.get(machine) else {
+                let Some(id) = self.config.machine_ids.get(machine) else {
                     red_ln!("error: no ID found for {machine}");
                     return None;
                 };
