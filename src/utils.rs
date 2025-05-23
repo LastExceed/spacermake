@@ -2,7 +2,6 @@ use std::time::Duration;
 
 pub mod logs;
 pub mod booking;
-pub mod index;
 
 pub fn get_power_state(payload: &str) -> Result<String, &'static str> {
     //todo: there gotta be an easier way to do this

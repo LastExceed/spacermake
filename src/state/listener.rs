@@ -8,7 +8,6 @@ use rumqttc::Event::Incoming;
 use rumqttc::Packet::Publish;
 
 use crate::{State, Listener, BOOKING_TOPIC};
-use crate::utils::index;
 use crate::utils::get_power_state;
 use crate::utils::logs::{log_debug, machinelog};
 use crate::utils::booking::Booking;
@@ -148,7 +147,7 @@ impl State<Listener> {
                     .get(machine)
                     .unwrap_or(&fallback) // machine being unknown already got logged when it got turned on, so we can ignore it here
                     .iter()
-                    .filter(|slave| booking.is_running() || self.config.slave_properties[*slave][index::RUNS_CONTINUOUSLY])
+                    .filter(|slave| booking.is_running() || self.config.slave_properties[*slave].runs_continuously)
             )
             .cloned()
             .collect();
@@ -160,10 +159,10 @@ impl State<Listener> {
             .ok_or("unknown master")?
             .sub(&slaves_used_by_others)
             .into_iter()
-            .filter(|slave| if self.config.slave_properties[slave][index::RUNS_CONTINUOUSLY] { long_slaves } else { short_slaves });
+            .filter(|slave| if self.config.slave_properties[slave].runs_continuously { long_slaves } else { short_slaves });
 
         for slave in slaves_to_update {
-            if self.config.slave_properties[&slave][index::NEEDS_TRAILING_TIME] {
+            if self.config.slave_properties[&slave].needs_trailing_time {
                 if power {
                     self.cancel_scheduled_shutdown(&slave).await;
                 } else {

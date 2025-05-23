@@ -7,7 +7,6 @@ use rumqttc::{AsyncClient, QoS};
 use tokio::sync::RwLock;
 
 use crate::my_config::MyConfig;
-use crate::utils::index;
 use crate::utils::booking::Booking;
 
 mod announcer;
@@ -50,27 +49,14 @@ impl<Kind> State<Kind> {
     //probably doesn't belong here, dunno where else to put it
     async fn set_power_state(&self, machine: &str, new_state: bool) {
         dark_grey_ln!("set power state - {machine} {new_state}");
-        let is_tasmota = self.config.slave_properties[machine][index::IS_TASMOTA];
-        let topic =
-            if is_tasmota {
-                format!("cmnd/{machine}/Power")
-            } else {
-                format!("shellies/{machine}/relay/0/command")
-            };
+        let props = &self.config.slave_properties[machine];
+        let payload = if new_state { &props.payload_on } else { &props.payload_off };
 
-        #[allow(clippy::collapsible_else_if)]
-        let payload =
-            if is_tasmota {
-                if new_state { b"ON".as_slice() } else { b"OFF".as_slice() }
-            } else {
-                if new_state { b"on".as_slice() } else { b"off".as_slice() }
-            };
-
-        dark_grey_ln!("publishing\n  topic: {topic}\n  payload: {payload:?}");
+        dark_grey_ln!("publishing\n  topic: {}\n  payload: {payload:?}", payload);
         self.client
             .read()
             .await
-            .publish(topic, QoS::AtMostOnce, false, payload)
+            .publish(&props.topic, QoS::AtMostOnce, false, payload.as_bytes())
             .await
             .expect("failed to publish");
     }

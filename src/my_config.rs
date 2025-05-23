@@ -5,10 +5,14 @@ use std::collections::{HashMap, HashSet};
 use config::Config;
 use tap::Pipe;
 
+use self::slave::Slave;
+
+pub mod slave;
+
 #[derive(Debug)]
 pub struct MyConfig {
     pub slaves_by_master: HashMap<String, HashSet<String>>,
-    pub slave_properties: HashMap<String, [bool; 3]>,
+    pub slave_properties: HashMap<String, Slave>,
     pub machine_ids     : HashMap<String, String>,
     pub data_user       : HashMap<String, UserData>,
     pub data_machines   : HashMap<String, MachineData>,
