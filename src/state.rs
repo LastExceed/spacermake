@@ -52,7 +52,7 @@ impl<Kind> State<Kind> {
         let props = &self.config.slave_properties[machine];
         let payload = if new_state { &props.payload_on } else { &props.payload_off };
 
-        dark_grey_ln!("publishing\n  topic: {}\n  payload: {payload:?}", payload);
+        dark_grey_ln!("publishing\n  topic: {}\n  payload: {:?}", props.topic, payload);
         self.client
             .read()
             .await
