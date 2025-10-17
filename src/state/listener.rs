@@ -75,12 +75,14 @@ impl State<Listener> {
         Ok(())
     }
 
-    #[allow(clippy::ptr_arg)] //false positive
     async fn try_book(&mut self, machine: &String, user: &String) -> Result<(), &'static str> {
         dark_grey_ln!("booking {machine}");
         let mut bookings = self.bookings.write().await;
         if bookings.contains_key(machine) {
-            return Err("machine got double-booked");
+            drop(bookings); // i really need to stop with these awful hacks
+            dark_grey_ln!("double-booked {machine} - releasing prior");
+            self.try_release(machine).await?;
+            bookings = self.bookings.write().await;
         }
         bookings.insert(machine.clone(), Booking::new(user.clone()));
         drop(bookings);
