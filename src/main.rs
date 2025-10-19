@@ -9,11 +9,17 @@ use self::my_config::MyConfig;
 pub mod my_config;
 mod state;
 mod utils;
+mod web;
+mod schema;
 
 pub const BOOKING_TOPIC: &str = "fabaccess/log";
 
 #[tokio::main]
 async fn main() {
+	lastexceed::start!();
+	web::start().await;
+	return;
+
 	magenta_ln!("===== spacermake =====");
 	
 	let my_config = MyConfig::load();
