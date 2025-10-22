@@ -1,0 +1,3 @@
+[submodule "fabaccess-api"]
+	path = fabaccess-api
+	url = https://gitlab.com/fabinfra/fabaccess/fabaccess-api
