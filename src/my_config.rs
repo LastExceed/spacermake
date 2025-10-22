@@ -75,7 +75,7 @@ impl MyConfig {
             .map(|line| {
                 let mut splits = line.split(',');
                 
-                let name = splits.next().unwrap().to_string();
+                let name = splits.next().unwrap().to_owned();
     
                 let ud = UserData {
                     id        : splits.next().unwrap().parse       ().ok(),
@@ -91,7 +91,7 @@ impl MyConfig {
             .map(|line| {
                 let mut splits = line.split(',');
                 
-                let name = splits.next().unwrap().to_string();
+                let name = splits.next().unwrap().to_owned();
                 let md = MachineData {
                     id         : splits.next().unwrap().parse       ().ok(),
                     to_be_used : splits.next().unwrap().parse::<i32>().unwrap_or(1) == 1,

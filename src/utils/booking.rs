@@ -7,7 +7,7 @@ pub struct Booking {
     pub creation_datetime: DateTime<Local>,
     pub creation_instant: Instant,
     pub currently_running_since: Option<Instant>,
-    runtime_accumulator: Duration
+    pub runtime_accumulator: Duration
 }
 
 impl Booking {
@@ -39,7 +39,7 @@ impl Booking {
         true
     }
 
-    pub fn is_running(&self) -> bool {
+    pub const fn is_running(&self) -> bool {
         self.currently_running_since.is_some()
     }
 

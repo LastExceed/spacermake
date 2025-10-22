@@ -21,8 +21,8 @@ pub fn get_power_state(payload: &str) -> Result<String, &'static str> {
 }
 
 ///whether this duration crossed a minute boundary within the last second
-pub fn minute_mark(duration: Duration) -> bool {
-    duration.as_secs() % 60 == 0
+pub const fn minute_mark(duration: Duration) -> bool {
+    duration.as_secs().is_multiple_of(60)
 }
 
 pub fn create_display_time_string(runtime: Duration) -> String {

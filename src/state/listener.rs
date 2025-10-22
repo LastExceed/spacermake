@@ -13,7 +13,7 @@ use crate::utils::logs::{log_debug, machinelog};
 use crate::utils::booking::Booking;
 
 impl State<Listener> {
-    pub async fn run(mut self, mut event_loop: EventLoop) {
+    pub async fn run(self, mut event_loop: EventLoop) -> ! {
         loop {
             let Incoming(Publish(publish)) = event_loop
                 .poll()
@@ -26,7 +26,7 @@ impl State<Listener> {
         }
     }
 
-    async fn on_publish(&mut self, publish: rumqttc::Publish) {
+    async fn on_publish(&self, publish: rumqttc::Publish) {
         let Ok(payload) = String::from_utf8(publish.payload.clone().into()) else {
             red_ln!("publish with non-utf8 payload received - {:?}", publish.payload);
             return;
@@ -39,7 +39,7 @@ impl State<Listener> {
             .expect("debug log failed");
     }
 
-    async fn handle_payload(&mut self, topic: &str, payload: &str) -> Result<(), &'static str> {
+    async fn handle_payload(&self, topic: &str, payload: &str) -> Result<(), &'static str> {
         let splits: Result<[_; 3], _> = topic
             .split('/')
             .collect::<Vec<_>>()
@@ -56,7 +56,7 @@ impl State<Listener> {
         }
     }
 
-    async fn on_booking_change(&mut self, payload: &str) -> Result<(), &'static str> {
+    async fn on_booking_change(&self, payload: &str) -> Result<(), &'static str> {
         let [machine, user, status] = payload
             .split(';')
             .map(String::from)
@@ -75,7 +75,7 @@ impl State<Listener> {
         Ok(())
     }
 
-    async fn try_book(&mut self, machine: &String, user: &String) -> Result<(), &'static str> {
+    async fn try_book(&self, machine: &String, user: &str) -> Result<(), &'static str> {
         dark_grey_ln!("booking {machine}");
         let mut bookings = self.bookings.write().await;
         if bookings.contains_key(machine) {
@@ -84,12 +84,12 @@ impl State<Listener> {
             self.try_release(machine).await?;
             bookings = self.bookings.write().await;
         }
-        bookings.insert(machine.clone(), Booking::new(user.clone()));
+        bookings.insert(machine.clone(), Booking::new(user.to_owned()));
         drop(bookings);
         self.update_slaves(machine, false, true, true).await
     }
 
-    async fn try_release(&mut self, machine: &String) -> Result<(), &'static str> {
+    async fn try_release(&self, machine: &String) -> Result<(), &'static str> {
         dark_grey_ln!("releasing {machine}");
         let mut booking = self
             .bookings
@@ -107,7 +107,7 @@ impl State<Listener> {
         Ok(())
     }
 
-    async fn on_machine_activity(&mut self, payload: &str, machine: &String) -> Result<(), &'static str> {
+    async fn on_machine_activity(&self, payload: &str, machine: &String) -> Result<(), &'static str> {
         let power_string = get_power_state(payload)?;
 
         let (power, err) =
@@ -132,7 +132,7 @@ impl State<Listener> {
         Ok(())
     }
 
-    pub async fn update_slaves(&mut self, master: &String, short_slaves: bool, long_slaves: bool, power: bool) -> Result<(), &'static str> {
+    pub async fn update_slaves(&self, master: &String, short_slaves: bool, long_slaves: bool, power: bool) -> Result<(), &'static str> {
         dark_grey_ln!("updating slaves...");
 
         let fallback = HashSet::new();

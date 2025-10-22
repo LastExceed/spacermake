@@ -14,14 +14,14 @@ use self::billing::billinglog;
 pub mod billing;
 
 #[derive(Debug, Serialize)]
-struct Record<'s> {
-    machine: &'s str,
+struct Record<'string> {
+    machine: &'string str,
     date: String,
     time_booked: String,
     time_released: String,
     booking_duration: i32, //minutes
     runtime: i32, //minutes
-    user: &'s str
+    user: &'string str
 }
 
 pub fn machinelog(machine: &str, booking: &Booking, config: &MyConfig) -> io::Result<()> {
@@ -57,7 +57,7 @@ pub fn log_debug(topic: &str, payload: &str, result: Result<(), &str>, config: &
         red_ln!("error: {error}");
         red_ln!("	topic: {topic}");
         red_ln!("	payload: {payload}");
-        red_ln!()
+        red_ln!();
     }
 
     let time = Local::now().to_string();

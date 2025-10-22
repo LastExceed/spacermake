@@ -22,14 +22,13 @@ struct BillingRecord {
 
 pub fn billinglog(machine: &str, booking: &Booking, config: &MyConfig) -> io::Result<()> {
     let user_id =
-        if let Some(user_data) = &config.data_user.get(&booking.user.to_string()) {
+        if let Some(user_data) = &config.data_user.get(&booking.user) {
             if !user_data.to_be_used { return Ok(()); }
             user_data
                 .id
-                .map(|i| i.to_string())
-                .unwrap_or(booking.user.to_string())
+                .map_or_else(|| booking.user.clone(), |i|i.to_string())
         } else {
-            booking.user.to_string()
+            booking.user.clone()
         };
         
     let machine_data = &config
@@ -46,8 +45,7 @@ pub fn billinglog(machine: &str, booking: &Booking, config: &MyConfig) -> io::Re
     
     let artikel_id = machine_data
         .id
-        .map(|i| i.to_string())
-        .unwrap_or(machine.to_string());
+        .map_or_else(|| machine.to_owned(), |i| i.to_string());
     
     let anzahl =
         if machine_data.power_sense {

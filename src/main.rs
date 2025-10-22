@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use colour::{dark_grey_ln, magenta_ln};
+use futures::future::join3;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use state::{Announcer, Listener, State};
 
@@ -17,8 +18,6 @@ pub const BOOKING_TOPIC: &str = "fabaccess/log";
 #[tokio::main]
 async fn main() {
 	lastexceed::start!();
-	web::start().await;
-	return;
 
 	magenta_ln!("===== spacermake =====");
 	
@@ -30,8 +29,11 @@ async fn main() {
 	let listener = State::new(Listener, client, my_config);
 	let announcer = listener.duplicate_as(Announcer);
 
-	tokio::spawn(announcer.run());
-	listener.run(event_loop).await;
+	join3(
+		web::start(),
+		announcer.run(),
+		listener.run(event_loop)
+	).await;
 }
 
 async fn create_client(my_config: &MyConfig) -> (AsyncClient, EventLoop) {

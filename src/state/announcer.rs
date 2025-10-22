@@ -11,7 +11,7 @@ use crate::utils::{create_display_time_string, minute_mark};
 use crate::{Announcer, State};
 
 impl State<Announcer> {
-    pub async fn run(self) {
+    pub async fn run(self) -> ! {
         loop {
             join!(
                 self.update_all_runtime_displays(),
