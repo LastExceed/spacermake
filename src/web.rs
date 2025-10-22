@@ -7,6 +7,8 @@ use warp::reply::*;
 use warp::*;
 use fab_api::FrontDesk;
 
+use crate::my_config::MyConfig;
+
 mod fab_api;
 mod page;
 
@@ -14,10 +16,10 @@ type FormData = HashMap<String, String>;
 
 const COOKIE_NAME: &str = "fab_credentials";
 
-pub async fn start() {
+pub async fn start(config: Arc<MyConfig>) {
     let local_set = task::LocalSet::new();
     
-    let front_desk = fab_api::start_local(&local_set).await;
+    let front_desk = fab_api::start_local(&local_set, config).await;
     let web_server = server(front_desk);
 
     local_set.run_until(web_server).await;
@@ -80,7 +82,7 @@ async fn on_login(mut form: FormData, front_desk: Arc<FrontDesk>) -> reply::Resp
 }
 
 async fn on_toggle_machine(cookie: String, urn: String, front_desk: Arc<FrontDesk>) -> reply::Response {
-    let Ok([name, pw]) = dbg!(serde_json::from_str::<[String; 2]>(&cookie))
+    let Ok([name, pw]) = serde_json::from_str::<[String; 2]>(&cookie)
     else { return page::login(); };
     
     match front_desk.exchange(name, pw, Some(urn)).await {

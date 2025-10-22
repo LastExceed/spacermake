@@ -26,10 +26,10 @@ pub struct State<Kind> {
 }
 
 impl<Kind> State<Kind> {
-    pub fn new(kind: Kind, client: AsyncClient, my_config: MyConfig) -> Self {
+    pub fn new(kind: Kind, client: AsyncClient, config: Arc<MyConfig>) -> Self {
         Self {
             kind,
-            config: Arc::new(my_config),
+            config,
             client: Arc::new(RwLock::new(client)),
             bookings: Default::default(),
             scheduled_shutdowns: Default::default()

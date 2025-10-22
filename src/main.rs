@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use std::time::Duration;
 
 use colour::{dark_grey_ln, magenta_ln};
@@ -17,20 +18,18 @@ pub const BOOKING_TOPIC: &str = "fabaccess/log";
 
 #[tokio::main]
 async fn main() {
-	lastexceed::start!();
-
 	magenta_ln!("===== spacermake =====");
 	
-	let my_config = MyConfig::load();
+	let my_config = Arc::new(MyConfig::load());
 	dark_grey_ln!("{my_config:#?}");
 
 	let (client, event_loop) = create_client(&my_config).await;
 	magenta_ln!("start");
-	let listener = State::new(Listener, client, my_config);
+	let listener = State::new(Listener, client, Arc::clone(&my_config));
 	let announcer = listener.duplicate_as(Announcer);
 
 	join3(
-		web::start(),
+		web::start(my_config),
 		announcer.run(),
 		listener.run(event_loop)
 	).await;

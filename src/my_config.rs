@@ -22,6 +22,8 @@ pub struct MyConfig {
     pub mqtt_host       : String,
     pub mqtt_username   : Option<String>,
     pub mqtt_password   : Option<String>,
+    pub fabaccess_host  : String,
+    pub fabaccess_port  : u16
 }
 
 #[derive(Debug)]
@@ -109,12 +111,14 @@ impl MyConfig {
             machine_ids,
             data_user,
             data_machines,
-            billing_log  : config.get("BILLING_LOG").unwrap(),
-            machine_log  : config.get("MACHINE_LOG").unwrap(),
-            debug_log    : config.get("DEBUG_LOG").unwrap(),
-            mqtt_host    : config.get("MQTT_HOST").unwrap(),
-            mqtt_username: config.get("MQTT_USERNAME").ok(),
-            mqtt_password: config.get("MQTT_PASSWORD").ok()
+            billing_log   : config.get("BILLING_LOG").unwrap(),
+            machine_log   : config.get("MACHINE_LOG").unwrap(),
+            debug_log     : config.get("DEBUG_LOG").unwrap(),
+            mqtt_host     : config.get("MQTT_HOST").unwrap(),
+            mqtt_username : config.get("MQTT_USERNAME").ok(),
+            mqtt_password : config.get("MQTT_PASSWORD").ok(),
+            fabaccess_host: config.get("FABACCESS_HOST").unwrap(),
+            fabaccess_port: config.get("FABACCESS_PORT").unwrap()
         }
     }
 }
@@ -128,9 +132,11 @@ fn open_or_create_file(config: &Config, key: &str) -> String {
 
     File::options()
         .read(true)
-        // .create(true)
-        .open(path)
-        .unwrap()
+        .write(true) // needed for creation
+        .create(true)
+        .truncate(false)
+        .open(&path)
+        .unwrap_or_else(|error| panic!("failed to open file {path} ~~ {error}"))
         .read_to_string(&mut out)
         .unwrap();
     

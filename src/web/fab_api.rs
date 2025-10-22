@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::anyhow;
 use capnp_rpc::rpc_twoparty_capnp::Side;
 use futures::channel::mpsc::{self, Receiver, Sender};
@@ -12,6 +14,7 @@ use tap::{Tap, Pipe};
 use capnp_rpc::*;
 use futures::StreamExt;
 use tokio::task::LocalSet;
+use crate::my_config::MyConfig;
 use crate::schema::machine_capnp::machine::MachineState;
 use crate::schema::*;
 
@@ -60,11 +63,11 @@ impl FrontDesk {
     }
 }
 
-pub async fn start_local(local_set: &LocalSet) -> FrontDesk {
+pub async fn start_local(local_set: &LocalSet, config: Arc<MyConfig>) -> FrontDesk {
     let (req_snd, mut req_recv) = mpsc::channel(1);
     let (mut rsp_snd, rsp_recv) = mpsc::channel(1);
 
-    let mut rpc_system = connect_rpc().await;
+    let mut rpc_system = connect_rpc(config).await;
     let bootstrap = rpc_system.bootstrap::<Bootstrap>(Side::Server);
 
     local_set.spawn_local(rpc_system);
@@ -90,14 +93,14 @@ async fn handle_request(bootstrap: &Bootstrap, ChannelRequest { username, passwo
     get_machines(&machine_system_info).await
 }
 
-async fn connect_rpc() -> RpcSystem<Side> {
+async fn connect_rpc(config: Arc<MyConfig>) -> RpcSystem<Side> {
     let tls_connector = TlsConnector::new().danger_accept_invalid_certs(true);
 
-    TcpStream::connect("test.fab-access.org:59661")
+    TcpStream::connect((config.fabaccess_host.as_str(), config.fabaccess_port))
     .await
     .unwrap()
     .tap(|stream|stream.set_nodelay(true).unwrap())
-    .pipe(|stream| tls_connector.connect("test.fab-access.org", stream))
+    .pipe(|stream| tls_connector.connect(&config.fabaccess_host, stream))
     .await
     .unwrap()
     .pipe(TokioAsyncReadCompatExt::compat)
