@@ -67,14 +67,15 @@ pub async fn start_local(local_set: &LocalSet, config: Arc<MyConfig>) -> FrontDe
     let (req_snd, mut req_recv) = mpsc::channel(1);
     let (mut rsp_snd, rsp_recv) = mpsc::channel(1);
 
-    let mut rpc_system = connect_rpc(config).await;
-    let bootstrap = rpc_system.bootstrap::<Bootstrap>(Side::Server);
-
-    local_set.spawn_local(rpc_system);
     local_set.spawn_local(async move {
         #[expect(clippy::infinite_loop, reason = "intended")]
         loop {
             let request = req_recv.next().await.unwrap();
+            
+            let mut rpc_system = connect_rpc(Arc::clone(&config)).await;
+            let bootstrap = rpc_system.bootstrap::<Bootstrap>(Side::Server);
+            tokio::task::spawn_local(rpc_system);
+            
             let response = handle_request(&bootstrap, request).await;
             rsp_snd.send(response).await.unwrap();
         }
@@ -89,7 +90,7 @@ async fn handle_request(bootstrap: &Bootstrap, ChannelRequest { username, passwo
     if let Some(target) = to_toggle {
         toggle_machine(&machine_system_info, target).await?;
     }
-    
+
     get_machines(&machine_system_info).await
 }
 
@@ -179,7 +180,6 @@ async fn toggle_machine(machine_system_info: &MachineSystemInfo, target: String)
         } else {
             machine.get_use()?.use_request().send().promise.await?.get().map(|_| ())
         }
-        
     })
     .await?
     .pipe(Ok)

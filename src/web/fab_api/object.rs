@@ -25,8 +25,8 @@ impl TryFrom<machine::Reader<'_>> for Machine {
             urn        : value.get_urn()        ?.to_string().map_err(capnp::ErrorKind::TextContainsNonUtf8Data).map_err(capnp::Error::from_kind)?,
             usage      : match value.get_state()? {
                 MachineState::Free => Usage::Free,
-                MachineState::InUse if value.has_inuse() => Usage::UsedByMe,
-                MachineState::InUse => Usage::UsedByOthers,
+                MachineState::InUse if value.has_inuse() => Usage::Yours,
+                MachineState::InUse => Usage::Occupied,
                 _ => Usage::Unknown // todo
             }
         }
@@ -34,21 +34,10 @@ impl TryFrom<machine::Reader<'_>> for Machine {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, strum::EnumString)]
 pub enum Usage {
     Free,
-    UsedByMe,
-    UsedByOthers,
+    Yours,
+    Occupied,
     Unknown
-}
-
-impl Usage {
-    pub const fn button_text(self) -> &'static str {
-        match self {
-            Self::Free => "use",
-            Self::UsedByMe => "give back",
-            Self::UsedByOthers => "force free",
-            Self::Unknown => ""
-        }
-    }
 }

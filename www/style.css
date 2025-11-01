@@ -1,0 +1,78 @@
+* {
+    margin: 0;
+    font-family: Verdana;
+}
+
+html {
+    height: 100%;
+    color: white;
+    background-color: black;
+}
+
+body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* ================================================== */
+
+.button-back {
+    font-size: 7vh;
+    width: auto;
+}
+
+p {
+    text-align: center;
+    font-size: 3vh;
+    color: gray;
+}
+
+h1 {
+    font-size: 7vh;
+    text-align: center;
+}
+
+button {
+    font-size: 12vh;
+    background-color: dimgray;
+    border-radius: 999px;
+}
+
+.button-list {
+    font-size: 5vh;
+}
+
+.button-toggle {
+    font-size: 12vh;
+    width: 100%;
+}
+
+.button-danger {
+    border-color: red;
+    color: red;
+    border-width: 1vh;
+}
+
+.button-logout {
+    text-align: right;
+}
+
+.overview {
+    color: cyan;
+}
+
+i {
+    color: dimgray;
+    text-align: center;
+    font-size: 1vh;
+}
+
+ul {
+    text-align: center;
+}
+
+.error-page {
+    background-color: red;
+}
