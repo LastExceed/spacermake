@@ -31,6 +31,7 @@ serde_json = "1"
 mime = "0.3"
 strum = { version = "0.27", features = ["derive"] }
 base64 = "0.22"
+pollster = "0.4.0"
 
 [build-dependencies]
 capnpc = "0.23"

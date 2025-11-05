@@ -7,11 +7,9 @@ use colour::*;
 use http::*;
 use http::header::*;
 use tap::Pipe;
-use tokio::task;
 use warp::filters::path::FullPath;
 use warp::reply::*;
 use warp::*;
-use fab_api::FrontDesk;
 
 use crate::my_config::MyConfig;
 
@@ -19,28 +17,17 @@ mod fab_api;
 mod page;
 
 pub async fn start(config: Arc<MyConfig>) {
-    let local_set = task::LocalSet::new();
-
-    let front_desk = fab_api::start_local(&local_set, config).await;
-    let web_server = server(front_desk);
-
-    local_set.run_until(web_server).await;
-}
-
-pub async fn server(front_desk: FrontDesk) {
-    let front_desk = Arc::new(front_desk);
-    
     path::full()
     .and(warp::header::optional(AUTHORIZATION.as_str()))
-    .then(move |path, auth| on_request(path, auth, Arc::clone(&front_desk)))
+    .then(move |path, auth| on_request(path, auth, Arc::clone(&config)))
     .pipe(|main| warp::fs::dir("www").or(main))
     .pipe(warp::serve)
     .run((Ipv4Addr::UNSPECIFIED, 80))
     .await;
 }
 
-async fn on_request(path: FullPath, auth: Option<String>, front_desk: Arc<FrontDesk>) -> warp::reply::Response {
-	try_handle(path, auth, &front_desk)
+async fn on_request(path: FullPath, auth: Option<String>, config: Arc<MyConfig>) -> warp::reply::Response {
+	try_handle(path, auth, &config)
     .await
     .unwrap_or_else(|err| {
         if format!("{err:?}") == "(code = invalidCredentials)" {
@@ -52,7 +39,7 @@ async fn on_request(path: FullPath, auth: Option<String>, front_desk: Arc<FrontD
     })
 }
 
-async fn try_handle(path: FullPath, auth: Option<String>, front_desk: &FrontDesk) -> anyhow::Result<warp::reply::Response> {
+async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<MyConfig>) -> anyhow::Result<warp::reply::Response> {
     yellow_ln!("{}", path.as_str());
     let path =
         path
@@ -75,14 +62,7 @@ async fn try_handle(path: FullPath, auth: Option<String>, front_desk: &FrontDesk
     let target = splits.next();
     let toggle = splits.next() == Some("toggle");
 
-    let resources =
-    	front_desk
-    	.exchange(
-     		username,
-       		password,
-        	target.filter(|_| toggle).map(str::to_owned)
-     	)
-     	.await?;
+    let resources = fab_api::get_resources(&username, &password, target.filter(|_| toggle), config).await?;
 
     let Some(target_urn) = target
     else {

@@ -2,18 +2,16 @@ use std::sync::Arc;
 
 use anyhow::anyhow;
 use capnp_rpc::rpc_twoparty_capnp::Side;
-use futures::channel::mpsc::{self, Receiver, Sender};
 use futures::io::{BufReader, BufWriter};
-use futures::lock::Mutex;
-use futures::{AsyncReadExt, SinkExt};
+use futures::{AsyncReadExt, FutureExt};
 use itertools::Itertools;
+use pollster::FutureExt as _;
 use tokio::net::TcpStream;
 use tokio_util::compat::TokioAsyncReadCompatExt;
 use async_native_tls::TlsConnector;
 use tap::{Tap, Pipe};
 use capnp_rpc::*;
-use futures::StreamExt;
-use tokio::task::LocalSet;
+use tokio::task;
 use crate::my_config::MyConfig;
 use crate::schema::machine_capnp::machine::MachineState;
 use crate::schema::*;
@@ -27,65 +25,26 @@ type MachineSystemInfo = machinesystem_capnp::machine_system::info::Client;
 type AuthRespWhich<A0, A1, A2> = authenticationsystem_capnp::response::Which<A0, A1, A2>;
 type OptionalWhich<A0> = general_capnp::optional::Which<A0>;
 
-type ChannelResponse = Result<Vec<Machine>, anyhow::Error>;
-
-pub struct ChannelRequest {
-    pub username: String,
-    pub password: String,
-    pub to_toggle: Option<String>
+pub async fn get_resources(username: &str, password: &str, to_toggle: Option<&str>, config: &Arc<MyConfig>) -> anyhow::Result<Vec<Machine>> {
+    let username = username.to_owned();
+    let password = password.to_owned();
+    let to_toggle = to_toggle.map(str::to_owned);
+    let config = Arc::clone(config);
+    task::spawn_blocking(move || {
+        task::LocalSet
+        ::new()
+        .run_until(do_rpc(&username, &password, to_toggle.as_ref().map(|s| s.as_str()), &config))
+        .block_on()
+    })
+    .await?
 }
 
-pub struct FrontDesk {
-    sender: Mutex<Sender<ChannelRequest>>,
-    receiver: Mutex<Receiver<ChannelResponse>>
-}
-
-impl FrontDesk {
-    fn new(sender: Sender<ChannelRequest>, receiver: Receiver<ChannelResponse>) -> Self {
-        Self {
-            sender: Mutex::new(sender),
-            receiver: Mutex::new(receiver)
-        }
-    }
-
-    pub async fn exchange(&self, username: String, password: String, to_toggle: Option<String>) -> ChannelResponse {
-        let req = ChannelRequest {
-            username,
-            password,
-            to_toggle
-        };
-
-        let mut send_lock = self.sender.lock().await;
-        send_lock.send(req).await.unwrap();
-        let mut recv_lock = self.receiver.lock().await;
-        drop(send_lock);
-        recv_lock.next().await.unwrap()
-    }
-}
-
-pub async fn start_local(local_set: &LocalSet, config: Arc<MyConfig>) -> FrontDesk {
-    let (req_snd, mut req_recv) = mpsc::channel(1);
-    let (mut rsp_snd, rsp_recv) = mpsc::channel(1);
-
-    local_set.spawn_local(async move {
-        #[expect(clippy::infinite_loop, reason = "intended")]
-        loop {
-            let request = req_recv.next().await.unwrap();
-            
-            let mut rpc_system = connect_rpc(Arc::clone(&config)).await;
-            let bootstrap = rpc_system.bootstrap::<Bootstrap>(Side::Server);
-            tokio::task::spawn_local(rpc_system);
-            
-            let response = handle_request(&bootstrap, request).await;
-            rsp_snd.send(response).await.unwrap();
-        }
-    });
+async fn do_rpc(username: &str, password: &str, to_toggle: Option<&str>, config: &MyConfig) -> anyhow::Result<Vec<Machine>> {
+    let mut rpc_system = connect_rpc(&config).await?;
+    let bootstrap = rpc_system.bootstrap::<Bootstrap>(Side::Server);
+    task::spawn_local(rpc_system);
     
-    FrontDesk::new(req_snd, rsp_recv)
-}
-
-async fn handle_request(bootstrap: &Bootstrap, ChannelRequest { username, password, to_toggle }: ChannelRequest) -> anyhow::Result<Vec<Machine>> {
-    let machine_system_info = try_api_login(bootstrap, &username, &password).await?;
+    let machine_system_info = try_api_login(&bootstrap, username, password).await?;
 
     if let Some(target) = to_toggle {
         toggle_machine(&machine_system_info, target).await?;
@@ -94,16 +53,15 @@ async fn handle_request(bootstrap: &Bootstrap, ChannelRequest { username, passwo
     get_machines(&machine_system_info).await
 }
 
-async fn connect_rpc(config: Arc<MyConfig>) -> RpcSystem<Side> {
-    let tls_connector = TlsConnector::new().danger_accept_invalid_certs(true);
-
-    TcpStream::connect((config.fabaccess_host.as_str(), config.fabaccess_port))
-    .await
-    .unwrap()
-    .tap(|stream|stream.set_nodelay(true).unwrap())
-    .pipe(|stream| tls_connector.connect(&config.fabaccess_host, stream))
-    .await
-    .unwrap()
+async fn connect_rpc(config: &MyConfig) -> anyhow::Result<RpcSystem<Side>> {
+    let stream = TcpStream::connect((config.fabaccess_host.as_str(), config.fabaccess_port)).await?;
+    stream.set_nodelay(true)?;
+    
+    TlsConnector
+    ::new()
+    .danger_accept_invalid_certs(true)
+    .connect(&config.fabaccess_host, stream)
+    .await?
     .pipe(TokioAsyncReadCompatExt::compat)
     .split()
     .pipe(|(reader, writer)|
@@ -116,9 +74,10 @@ async fn connect_rpc(config: Arc<MyConfig>) -> RpcSystem<Side> {
     )
     .pipe(Box::new)
     .pipe(|network| RpcSystem::new(network, None))
+    .pipe(Ok)
 }
 
-pub async fn try_api_login(bootstrap: &Bootstrap, username: &str, password: &str) -> anyhow::Result<MachineSystemInfo> {
+async fn try_api_login(bootstrap: &Bootstrap, username: &str, password: &str) -> anyhow::Result<MachineSystemInfo> {
     bootstrap
     .create_session_request()
     .tap_mut(|req| req.get().set_mechanism("PLAIN"))
@@ -145,7 +104,7 @@ pub async fn try_api_login(bootstrap: &Bootstrap, username: &str, password: &str
     .pipe(Ok)
 }
 
-pub async fn get_machines(machine_system_info: &MachineSystemInfo) -> anyhow::Result<Vec<Machine>> {
+async fn get_machines(machine_system_info: &MachineSystemInfo) -> anyhow::Result<Vec<Machine>> {
     machine_system_info
     .get_machine_list_request()
     .send()
@@ -159,7 +118,7 @@ pub async fn get_machines(machine_system_info: &MachineSystemInfo) -> anyhow::Re
     .map_err(capnp::Error::into)
 }
 
-async fn toggle_machine(machine_system_info: &MachineSystemInfo, target: String) -> anyhow::Result<()> {
+async fn toggle_machine(machine_system_info: &MachineSystemInfo, target: &str) -> anyhow::Result<()> {
     machine_system_info
     .get_machine_u_r_n_request()
     .tap_mut(|x| x.get().set_urn(target))
