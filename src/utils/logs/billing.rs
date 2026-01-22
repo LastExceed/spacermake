@@ -7,7 +7,7 @@ use csv::WriterBuilder;
 use serde::Serialize;
 
 use crate::utils::booking::Booking;
-use crate::my_config::{MachineData, MyConfig};
+use crate::config::{MachineData, SpacerConfig};
 
 #[derive(Debug, Serialize)]
 struct BillingRecord {
@@ -20,7 +20,7 @@ struct BillingRecord {
     rechnungstyp: i32                     // 0
 }
 
-pub fn billinglog(machine: &str, booking: &Booking, config: &MyConfig) -> io::Result<()> {
+pub fn billinglog(machine: &str, booking: &Booking, config: &SpacerConfig) -> io::Result<()> {
     let user_id =
         if let Some(user_data) = &config.data_user.get(&booking.user) {
             if !user_data.to_be_used { return Ok(()); }

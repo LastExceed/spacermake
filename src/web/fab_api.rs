@@ -12,7 +12,7 @@ use async_native_tls::TlsConnector;
 use tap::{Tap, Pipe};
 use capnp_rpc::*;
 use tokio::task;
-use crate::my_config::MyConfig;
+use crate::config::SpacerConfig;
 use crate::schema::machine_capnp::machine::MachineState;
 use crate::schema::*;
 
@@ -25,7 +25,7 @@ type MachineSystemInfo = machinesystem_capnp::machine_system::info::Client;
 type AuthRespWhich<A0, A1, A2> = authenticationsystem_capnp::response::Which<A0, A1, A2>;
 type OptionalWhich<A0> = general_capnp::optional::Which<A0>;
 
-pub async fn get_resources(username: &str, password: &str, to_toggle: Option<&str>, config: &Arc<MyConfig>) -> anyhow::Result<Vec<Machine>> {
+pub async fn get_resources(username: &str, password: &str, to_toggle: Option<&str>, config: &Arc<SpacerConfig>) -> anyhow::Result<Vec<Machine>> {
     let username = username.to_owned();
     let password = password.to_owned();
     let to_toggle = to_toggle.map(str::to_owned);
@@ -40,7 +40,7 @@ pub async fn get_resources(username: &str, password: &str, to_toggle: Option<&st
     .await?
 }
 
-async fn do_rpc(username: &str, password: &str, to_toggle: Option<&str>, config: &MyConfig) -> anyhow::Result<Vec<Machine>> {
+async fn do_rpc(username: &str, password: &str, to_toggle: Option<&str>, config: &SpacerConfig) -> anyhow::Result<Vec<Machine>> {
     let mut rpc_system = connect_rpc(config).await?;
     let bootstrap = rpc_system.bootstrap::<Bootstrap>(Side::Server);
     task::spawn_local(rpc_system);
@@ -54,7 +54,7 @@ async fn do_rpc(username: &str, password: &str, to_toggle: Option<&str>, config:
     get_machines(&machine_system_info).await
 }
 
-async fn connect_rpc(config: &MyConfig) -> anyhow::Result<RpcSystem<Side>> {
+async fn connect_rpc(config: &SpacerConfig) -> anyhow::Result<RpcSystem<Side>> {
     let stream = TcpStream::connect((config.fabaccess_host.as_str(), config.fabaccess_port)).await?;
     stream.set_nodelay(true)?;
     

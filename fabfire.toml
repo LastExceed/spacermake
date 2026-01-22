@@ -1,0 +1,125 @@
+[mqtt]
+hostname = "mqtt.makerspace-bocholt.local"
+port = 1883
+
+[bffhd]
+hostname = "fabaccess.makerspace-bocholt.local"
+port = 59662
+
+[readers]
+    [readers.SandstrahlGross]
+    id = "001"
+    machine = "urn:fabaccess:resource:SandstrahlGross"
+
+    [readers.Skylaser9060]
+    id = "002"
+    machine = "urn:fabaccess:resource:SkyLaser9060"
+
+    [readers.d3dKampshoff]
+    id = "003"
+    machine = "urn:fabaccess:resource:d3dKampshoff"
+
+    [readers.d3dBambuA1mini]
+    id = "004"
+    machine = "urn:fabaccess:resource:d3dBambuA1mini"
+    
+    [readers.d3dBambuA1miniAMS]
+    id = "005"
+    machine = "urn:fabaccess:resource:d3dBambuA1miniAMS"
+    
+    [readers.d3dRexII]
+    id = "006"
+    machine = "urn:fabaccess:resource:d3dRexII"
+    
+    [readers.d3dBambuA1AMS]
+    id = "007"
+    machine = "urn:fabaccess:resource:d3dBambuA1AMS"
+    
+    [readers.d3dBambuA1]
+    id = "008"
+    machine = "urn:fabaccess:resource:d3dBambuA1"
+    
+    [readers.d3dMk3S]
+    id = "009"
+    machine = "urn:fabaccess:resource:d3dMk3S"
+    
+    [readers.d3dReserve]
+    id = "010"
+    machine = "urn:fabaccess:resource:d3dReserve"
+    
+    [readers.Plasma]
+    id = "011"
+    machine = "urn:fabaccess:resource:Plasma"
+
+    [readers.Schweissen3]
+    id = "012"
+    machine = "urn:fabaccess:resource:Schweissen3"
+
+    [readers.FormatSaege]
+    id = "013"
+    machine = "urn:fabaccess:resource:FormatSaege"
+
+    [readers.PlattenSaege]
+    id = "014"
+    machine = "urn:fabaccess:resource:PlattenSaege"
+
+    [readers.DrehOptimum]
+    id = "015"
+    machine = "urn:fabaccess:resource:DrehOptimum"
+
+    [readers.StickMaschine]
+    id = "016"
+    machine = "urn:fabaccess:resource:StickMaschine"
+
+    [readers.Schweissen1]
+    id = "017"
+    machine = "urn:fabaccess:resource:Schweissen1"
+
+    [readers.Schweissen2]
+    id = "018"
+    machine = "urn:fabaccess:resource:Schweissen2"
+
+    [readers.d3dBambuP1P]
+    id = "019"
+    machine = "urn:fabaccess:resource:d3dBambuP1P"
+
+    [readers.TextilSchrank]
+    id = "020"
+    machine = "urn:fabaccess:resource:TextilSchrank"
+
+    [readers.Kantenschleifer]
+    id = "021"
+    machine = "urn:fabaccess:resource:Kantenschleifer"
+
+    [readers.BandsaegeHolz]
+    id = "022"
+    machine = "urn:fabaccess:resource:BandsaegeHolz"
+
+    [readers.Staenderbohrmaschine]
+    id = "023"
+    machine = "urn:fabaccess:resource:Staenderbohrmaschine"
+
+    [readers.CNCmittel]
+    id = "024"
+    machine = "urn:fabaccess:resource:CNCmittel"
+
+    [readers.CNCgross]
+    id = "025"
+    machine = "urn:fabaccess:resource:CNCgross"
+
+    [readers.Drechselbank]
+    id = "026"
+    machine = "urn:fabaccess:resource:Drechselbank"
+
+    [readers.Brennofen]
+    id = "027"
+    machine = "urn:fabaccess:resource:Brennofen"
+
+    [readers.DrehEmcomat7]
+    id = "028"
+    machine = "urn:fabaccess:resource:DrehEmcomat7"
+
+    [readers.FraesOptimumBF20]
+    id = "029"
+    machine = "urn:fabaccess:resource:FraesOptimumBF20"
+

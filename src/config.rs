@@ -9,8 +9,9 @@ use self::slave::Slave;
 
 pub mod slave;
 
+#[expect(clippy::module_name_repetitions, reason = "avoid name collision with `config` crate")]
 #[derive(Debug)]
-pub struct MyConfig {
+pub struct SpacerConfig {
     pub slaves_by_master: HashMap<String, HashSet<String>>,
     pub slave_properties: HashMap<String, Slave>,
     pub machine_ids     : HashMap<String, String>,
@@ -40,7 +41,7 @@ pub struct MachineData {
     pub divider: i32
 }
 
-impl MyConfig {
+impl SpacerConfig {
     pub fn load() -> Self {
         let config = Config::builder()
             .add_source(config::File::with_name("spacermake"))

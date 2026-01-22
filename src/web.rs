@@ -13,12 +13,12 @@ use warp::filters::path::FullPath;
 use warp::reply::*;
 use warp::*;
 
-use crate::my_config::MyConfig;
+use crate::config::SpacerConfig;
 
 mod fab_api;
 mod page;
 
-pub async fn start(config: Arc<MyConfig>) {
+pub async fn start(config: Arc<SpacerConfig>) {
     path::full()
     .and(warp::header::optional(AUTHORIZATION.as_str()))
     .then(move |path, auth| on_request(path, auth, Arc::clone(&config)))
@@ -28,7 +28,7 @@ pub async fn start(config: Arc<MyConfig>) {
     .await;
 }
 
-async fn on_request(path: FullPath, auth: Option<String>, config: Arc<MyConfig>) -> warp::reply::Response {
+async fn on_request(path: FullPath, auth: Option<String>, config: Arc<SpacerConfig>) -> warp::reply::Response {
 	try_handle(path, auth, &config)
     .await
     .unwrap_or_else(|err| {
@@ -41,7 +41,7 @@ async fn on_request(path: FullPath, auth: Option<String>, config: Arc<MyConfig>)
     })
 }
 
-async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<MyConfig>) -> anyhow::Result<warp::reply::Response> {
+async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerConfig>) -> anyhow::Result<warp::reply::Response> {
     yellow_ln!("{}", path.as_str());
     let path =
         path

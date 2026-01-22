@@ -6,9 +6,9 @@ use futures::future::join3;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use state::{Announcer, Listener, State};
 
-use self::my_config::MyConfig;
+use self::config::SpacerConfig;
 
-pub mod my_config;
+pub mod config;
 mod state;
 mod utils;
 mod web;
@@ -19,8 +19,8 @@ pub const BOOKING_TOPIC: &str = "fabaccess/log";
 #[tokio::main]
 async fn main() {
 	magenta_ln!("===== spacermake =====");
-	
-	let my_config = Arc::new(MyConfig::load());
+
+	let my_config = Arc::new(SpacerConfig::load());
 	dark_grey_ln!("{my_config:#?}");
 
 	let (client, event_loop) = create_client(&my_config).await;
@@ -35,7 +35,7 @@ async fn main() {
 	).await;
 }
 
-async fn create_client(my_config: &MyConfig) -> (AsyncClient, EventLoop) {
+async fn create_client(my_config: &SpacerConfig) -> (AsyncClient, EventLoop) {
 	let mut mqttoptions = MqttOptions::new("spacermake", &my_config.mqtt_host, 1883);
 	mqttoptions.set_keep_alive(Duration::from_secs(5));
 	if let (Some(username), Some(password)) = (&my_config.mqtt_username, &my_config.mqtt_password) {

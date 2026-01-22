@@ -6,7 +6,7 @@ use colour::dark_grey_ln;
 use rumqttc::{AsyncClient, QoS};
 use tokio::sync::RwLock;
 
-use crate::my_config::MyConfig;
+use crate::config::SpacerConfig;
 use crate::utils::booking::Booking;
 
 mod announcer;
@@ -19,14 +19,14 @@ pub struct Announcer;
 pub struct State<Kind> {
     #[expect(dead_code, reason = "like PhantomData")]
     pub kind: Kind,
-    pub config: Arc<MyConfig>,
+    pub config: Arc<SpacerConfig>,
     pub client: Arc<RwLock<AsyncClient>>,
     pub bookings: Arc<RwLock<HashMap<String, Booking>>>,
     pub scheduled_shutdowns: Arc<RwLock<VecDeque<(Instant, String)>>>
 }
 
 impl<Kind> State<Kind> {
-    pub fn new(kind: Kind, client: AsyncClient, config: Arc<MyConfig>) -> Self {
+    pub fn new(kind: Kind, client: AsyncClient, config: Arc<SpacerConfig>) -> Self {
         Self {
             kind,
             config,

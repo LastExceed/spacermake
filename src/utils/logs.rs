@@ -7,7 +7,7 @@ use colour::red_ln;
 use csv::WriterBuilder;
 use serde::Serialize;
 
-use crate::{my_config::MyConfig, utils::booking::Booking};
+use crate::{config::SpacerConfig, utils::booking::Booking};
 
 use self::billing::billinglog;
 
@@ -24,7 +24,7 @@ struct Record<'string> {
     user: &'string str
 }
 
-pub fn machinelog(machine: &str, booking: &Booking, config: &MyConfig) -> io::Result<()> {
+pub fn machinelog(machine: &str, booking: &Booking, config: &SpacerConfig) -> io::Result<()> {
     billinglog(machine, booking, config)?;
 
     let record = Record {
@@ -52,7 +52,7 @@ pub fn machinelog(machine: &str, booking: &Booking, config: &MyConfig) -> io::Re
         })
 }
 
-pub fn log_debug(topic: &str, payload: &str, result: Result<(), &str>, config: &MyConfig) -> io::Result<()> {
+pub fn log_debug(topic: &str, payload: &str, result: Result<(), &str>, config: &SpacerConfig) -> io::Result<()> {
     if let Err(error) = result {
         red_ln!("error: {error}");
         red_ln!("	topic: {topic}");
