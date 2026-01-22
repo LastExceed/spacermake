@@ -68,7 +68,7 @@ async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerCon
 
     let Some(target_urn) = target
     else {
-        return Ok(page::overview(&resources));
+        return Ok(page::overview(&resources, config.hide_unbooked));
     };
     
     if target_urn.eq_ignore_ascii_case("debug") {

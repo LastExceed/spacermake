@@ -1,17 +1,15 @@
 use maud::*;
-use itertools::Itertools;
 use tap::Pipe;
 use warp::reply::Response;
 
 use super::button;
 use crate::web::fab_api::object::{Machine, Usage};
 
-pub fn overview(resources: &[Machine]) -> Response {
+pub fn overview(resources: &[Machine], hide_unbooked: bool) -> Response {
     let filtered =
         resources
         .iter()
-        .filter(|resource| resource.usage == Usage::Yours)
-        .collect_vec();
+        .filter(|resource| !hide_unbooked || resource.usage == Usage::Yours);
     
     html! {
         (DOCTYPE)

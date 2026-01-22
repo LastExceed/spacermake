@@ -11,3 +11,4 @@ MQTT_HOST = "localhost"
 # MQTT_PASSWORD = ""
 FABACCESS_HOST = "test.fab-access.org"
 FABACCESS_PORT = 59661
+HIDE_UNBOOKED = true

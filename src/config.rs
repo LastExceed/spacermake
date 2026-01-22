@@ -24,7 +24,8 @@ pub struct SpacerConfig {
     pub mqtt_username   : Option<String>,
     pub mqtt_password   : Option<String>,
     pub fabaccess_host  : String,
-    pub fabaccess_port  : u16
+    pub fabaccess_port  : u16,
+    pub hide_unbooked   : bool
 }
 
 #[derive(Debug)]
@@ -119,7 +120,8 @@ impl SpacerConfig {
             mqtt_username : config.get("MQTT_USERNAME").ok(),
             mqtt_password : config.get("MQTT_PASSWORD").ok(),
             fabaccess_host: config.get("FABACCESS_HOST").unwrap(),
-            fabaccess_port: config.get("FABACCESS_PORT").unwrap()
+            fabaccess_port: config.get("FABACCESS_PORT").unwrap(),
+            hide_unbooked : config.get("HIDE_UNBOOKED").unwrap()
         }
     }
 }
