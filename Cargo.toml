@@ -6,32 +6,29 @@ edition = "2024"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1", features = ["rt-multi-thread", "fs", "sync"] }
-rumqttc = "0.24" # 0.25 requires cmake
-json = "0.12"
-boolinator = "2"
+tokio = { version = "1.49.0", features = ["rt-multi-thread", "fs", "sync"] }
+rumqttc = "0.24.0" # 0.25 requires cmake
+json = "0.12.4"
+boolinator = "2.4.0"
 itertools = "0.14"
-csv = "1"
-chrono = "0.4"
-serde = { version = "1", features = ["derive"] }
-tap = "1"
-toml = "0.9"
-futures = "0.3"
-colour = "2"
-config = { version = "0.15", features = ["toml"] }
+csv = "1.4.0"
+chrono = "0.4.43"
+serde = { version = "1.0.228", features = ["derive"] }
+tap = "1.0.1"
+toml = "0.9.8"
+futures = "0.3.31"
+colour = "2.1.0"
+config = { version = "0.15.19", features = ["toml"] }
 warp = { version = "0.4.2", features = ["server"] }
-capnp = "0.23"
-capnp-rpc = "0.23"
-tokio-util = { version = "0.7", features = ["compat"] }
+capnp = "0.25.0"
+capnp-rpc = "0.25.0"
+tokio-util = { version = "0.7.18", features = ["compat"] }
 async-native-tls = { version = "0.5", default-features = false, features = ["runtime-tokio"] }
 maud = "0.27"
-anyhow = "1"
-extend = "1"
-serde_json = "1"
-mime = "0.3"
-strum = { version = "0.27", features = ["derive"] }
-base64 = "0.22"
-pollster = "0.4.0"
+anyhow = "1.0.100"
+extend = "1.2.0"
+strum = { version = "0.27.2", features = ["derive"] }
+base64 = "0.22.1"
 
 [build-dependencies]
-capnpc = "0.23"
+capnpc = "0.25.0"

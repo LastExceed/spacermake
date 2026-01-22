@@ -3,7 +3,7 @@ use tap::Pipe;
 use warp::reply::Response;
 use super::button;
 
-pub fn error(error: anyhow::Error) -> Response {
+pub fn error(error: &anyhow::Error) -> Response {
     html! {
         (DOCTYPE)
         meta charset="utf-8";

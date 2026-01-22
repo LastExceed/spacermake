@@ -3,9 +3,9 @@ use std::sync::Arc;
 use anyhow::anyhow;
 use capnp_rpc::rpc_twoparty_capnp::Side;
 use futures::io::{BufReader, BufWriter};
-use futures::{AsyncReadExt, FutureExt};
+use futures::AsyncReadExt;
+use futures::executor::block_on;
 use itertools::Itertools;
-use pollster::FutureExt as _;
 use tokio::net::TcpStream;
 use tokio_util::compat::TokioAsyncReadCompatExt;
 use async_native_tls::TlsConnector;
@@ -30,20 +30,21 @@ pub async fn get_resources(username: &str, password: &str, to_toggle: Option<&st
     let password = password.to_owned();
     let to_toggle = to_toggle.map(str::to_owned);
     let config = Arc::clone(config);
+
     task::spawn_blocking(move || {
         task::LocalSet
         ::new()
-        .run_until(do_rpc(&username, &password, to_toggle.as_ref().map(|s| s.as_str()), &config))
-        .block_on()
+        .run_until(do_rpc(&username, &password, to_toggle.as_deref(), &config))
+        .pipe(block_on)
     })
     .await?
 }
 
 async fn do_rpc(username: &str, password: &str, to_toggle: Option<&str>, config: &MyConfig) -> anyhow::Result<Vec<Machine>> {
-    let mut rpc_system = connect_rpc(&config).await?;
+    let mut rpc_system = connect_rpc(config).await?;
     let bootstrap = rpc_system.bootstrap::<Bootstrap>(Side::Server);
     task::spawn_local(rpc_system);
-    
+
     let machine_system_info = try_api_login(&bootstrap, username, password).await?;
 
     if let Some(target) = to_toggle {

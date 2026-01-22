@@ -1,3 +1,5 @@
+#![allow(clippy::absolute_paths, reason = "warp")]
+
 use std::net::Ipv4Addr;
 use std::sync::Arc;
 use anyhow::anyhow;
@@ -34,7 +36,7 @@ async fn on_request(path: FullPath, auth: Option<String>, config: Arc<MyConfig>)
             reply().with_auth().into_response()
         } else {
             red_ln!("{err:#?}");
-            page::error(err)
+            page::error(&err)
         }
     })
 }
