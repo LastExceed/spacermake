@@ -49,6 +49,10 @@ async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerCon
         .trim_start_matches('/')
         .trim_end_matches('?');
     
+    if path == "favicon.ico" {
+        return Ok(http::StatusCode::NO_CONTENT.into_response());
+    }
+    
     let Some(auth) = auth
     else {
         return Ok(reply().with_auth().into_response());
