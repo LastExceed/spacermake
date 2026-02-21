@@ -1,31 +1,33 @@
 use maud::*;
-use tap::Pipe;
-use warp::reply::Response;
+use crate::web::fab_api::object::Machine;
 
-use super::button;
-use crate::web::fab_api::object::{Machine, Usage};
-
-pub fn overview(resources: &[Machine], hide_unbooked: bool) -> Response {
-    let filtered =
+pub fn overview(resources: &[Machine], hide_unbooked: bool) -> Markup {
+    let group_map =
         resources
         .iter()
         .filter(|resource| !hide_unbooked || resource.usage == Usage::Yours);
+        .map(|res| (res.category.clone(), res))
+        .into_group_map();
     
     html! {
-        (DOCTYPE)
-        link rel="stylesheet" href="/style.css";
-        meta charset="utf-8";
+        header {}
 
-        h1 class="overview" { "Overview" }
+        main class="overview" {
+            details {
+                summary class="fake-button" { "SCAN QR-CODE" }
+                p class="notice" {}
+            }
         
-        ul {
-            @for resource in filtered {
-                (button(&resource.name, &format!("/{}", resource.urn), "button-list"))
+            @for (category, categorized_resources) in group_map {
+                h2 { (category) }
+                @for resource in categorized_resources {
+                    div class="resource" {
+                        h3 { (resource.name) }
+                        p class=(format!("status-{:?}", resource.usage)) {}
+                        (button("➔", &format!("/{}", resource.urn), "goto"))
+                    }
+                }
             }
         }
-        
-        i { ("iro illwuf evernas orgetfix ouyah ariemer. hankton ouyah orful verythingers /3<~%") }
     }
-    .into_string()
-    .pipe(|html| Response::new(html.into()))
 }

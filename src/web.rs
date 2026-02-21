@@ -55,7 +55,7 @@ async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerCon
     
     let Some(auth) = auth
     else {
-        return Ok(reply().with_auth().into_response());
+        return Ok(StatusCode::UNAUTHORIZED.with_auth().into_response());
     };
 
 	let [username, password] =
@@ -72,7 +72,9 @@ async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerCon
 
     let Some(target_urn) = target
     else {
-        return Ok(page::overview(&resources, config.hide_unbooked));
+        return page::overview(&resources, config.hide_unbooked)
+        .pipe_ref(page::template)
+        .pipe(Ok);
     };
     
     if target_urn.eq_ignore_ascii_case("debug") {
@@ -89,6 +91,7 @@ async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerCon
         redirect(&format!("/{}", target.unwrap()))
     } else {
         page::resource(target_resource)
+        .pipe_ref(page::template)
     }.pipe(Ok)
 }
 
@@ -102,7 +105,9 @@ fn decode_auth(base64: &str) -> anyhow::Result<[String; 2]> {
 }
 
 fn redirect(location: &str) -> warp::reply::Response {
-    reply().with_redirect(location).into_response()
+    StatusCode::SEE_OTHER
+    .with_header("Location", location)
+    .into_response()
 }
 
 #[extend::ext]
@@ -113,17 +118,6 @@ impl<T: Reply> T {
 
     fn with_status(self, status: StatusCode) -> WithStatus<T> {
         with_status(self, status)
-    }
-
-    fn with_set_cookie(self, name: &str, value: &str) -> WithHeader<T> {
-        self
-        .with_header("Set-Cookie", &format!("{name}={value}"))
-    }
-
-    fn with_redirect(self, location: &str) -> WithStatus<WithHeader<T>> {
-        self
-        .with_header("Location", location)
-        .with_status(http::StatusCode::SEE_OTHER)
     }
 
     fn with_auth(self) -> WithHeader<WithStatus<T>> {

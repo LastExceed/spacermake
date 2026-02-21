@@ -1,78 +1,130 @@
-* {
-    margin: 0;
-    font-family: Verdana;
+:root {
+	--accent: #00d4aa;
+	--contrast: #3c474d;
 }
 
-html {
-    height: 100%;
-    color: white;
-    background-color: black;
+/* meta */
+
+* {
+	font-family: 'Segoe UI';
 }
 
 body {
-    height: 100%;
+	margin: 0;
+}
+
+/* meta.components */
+
+button,
+summary.fake-button {
+	display: block;
+	background: var(--accent);
+	border: 0;
+	font-size: 18px;
+	font-weight: 700;
+	color: black;
+	padding: 12px 24px;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+summary.fake-button {
+	text-align: center;
+	margin: 0px 16px;
+}
+
+button:active,
+summary.fake-button:active {
+	background: lime;
+}
+
+header {
+	display: flex;
+    justify-content: space-between;
+	align-items: center;
+	min-height: 100px;
+	margin: 0;
+	background: var(--contrast);
+}
+
+button.back {
+	background: transparent;
+    color: var(--accent);
+	width: 100px;
+    font-size: xx-large;
+}
+
+main {
+	padding: 16px;
+}
+
+h2 {
+	color: gray;
+	font-weight: 500;
+}
+
+/* overview.header */
+
+button.logout {
+	font-size: 24px;
+	color: red;
+	background: transparent;
+}
+
+/* overview.QR */
+
+p.notice {
+	color: darkorange;
+	font-size: 32px;
+	font-weight: 700;
+    text-align: center;
+}
+
+/* overview.content */
+
+div.resource {
+	margin: 0px 24px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border-bottom: 1px solid lightgray;
+}
+
+h3 {
+	flex-grow: 1;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+/* resource */
+
+main.resource {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-}
-
-/* ================================================== */
-
-.button-back {
-    font-size: 7vh;
-    width: auto;
-}
-
-p {
-    text-align: center;
-    font-size: 3vh;
-    color: gray;
+    align-items: center;
 }
 
 h1 {
-    font-size: 7vh;
-    text-align: center;
+    margin: 200px;
 }
 
-button {
-    font-size: 12vh;
-    background-color: dimgray;
-    border-radius: 999px;
-}
+button.status-Occupied,
+button.status-Unknown { background: red; }
 
-.button-list {
-    font-size: 5vh;
-}
+button.status-Free::after    { content: "Benutzen"  ; }
+button.status-Yours::after   { content: "Freigeben"; }
+button.status-Occupied::after,
+button.status-Unknown::after { content: "RESET"  ;}
 
-.button-toggle {
-    font-size: 12vh;
-    width: 100%;
-}
+h1.status-Free::after    ,
+ p.status-Free::after     { content: "Frei"    ; color: var(--accent); }
+h1.status-Yours::after   ,
+ p.status-Yours::after    { content: "Deins"   ; color: gold ; }
+h1.status-Occupied::after,
+ p.status-Occupied::after { content: "Besetzt"; color: red  ; }
+h1.status-Unknown::after ,
+ p.status-Unknown::after  { content: "???" ; color: gray ; }
 
-.button-danger {
-    border-color: red;
-    color: red;
-    border-width: 1vh;
-}
-
-.button-logout {
-    text-align: right;
-}
-
-.overview {
-    color: cyan;
-}
-
-i {
-    color: dimgray;
-    text-align: center;
-    font-size: 1vh;
-}
-
-ul {
-    text-align: center;
-}
-
-.error-page {
-    background-color: red;
+p.notice::after {
+    content: "Bitte nutze die Kamera-App deines Smartphones/Tablets"
 }
