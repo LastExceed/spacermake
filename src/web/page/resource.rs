@@ -7,7 +7,7 @@ pub fn resource(resource: &Machine) -> Markup {
 	let status_class = format!("status-{:?}", resource.usage);
 	
 	html! {
-		header { (button("🢀", "/", "back")) }
+		header { (button("<--", "/", "back")) }
 		
 		main class="resource" {
 			h2 { (resource.name) }
