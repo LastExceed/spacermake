@@ -1,11 +1,13 @@
+use itertools::Itertools;
 use maud::*;
-use crate::web::fab_api::object::Machine;
+use crate::web::fab_api::object::{Machine, Usage};
+use crate::web::page::button;
 
 pub fn overview(resources: &[Machine], hide_unbooked: bool) -> Markup {
     let group_map =
         resources
         .iter()
-        .filter(|resource| !hide_unbooked || resource.usage == Usage::Yours);
+        .filter(|resource| !hide_unbooked || resource.usage == Usage::Yours)
         .map(|res| (res.category.clone(), res))
         .into_group_map();
     
