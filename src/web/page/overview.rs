@@ -9,7 +9,10 @@ pub fn overview(resources: &[Machine], hide_unbooked: bool) -> Markup {
         .iter()
         .filter(|resource| !hide_unbooked || resource.usage == Usage::Yours)
         .map(|res| (res.category.clone(), res))
-        .into_group_map();
+        .into_group_map()
+        .into_iter()
+        .sorted_by_cached_key(|tuple| tuple.0.clone())
+        .collect_vec();
     
     html! {
         header {}
