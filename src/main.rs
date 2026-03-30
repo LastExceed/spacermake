@@ -12,9 +12,7 @@ pub mod config;
 mod state;
 mod utils;
 mod web;
-mod schema;
-
-pub const BOOKING_TOPIC: &str = "fabaccess/log";
+mod machine;
 
 #[tokio::main]
 async fn main() {
@@ -44,7 +42,6 @@ async fn create_client(my_config: &SpacerConfig) -> (AsyncClient, EventLoop) {
 
 	let (client, event_loop) = AsyncClient::new(mqttoptions, 10);
 	client.subscribe("tele/+/MARGINS", QoS::AtMostOnce).await.expect("failed to subscribe");
-	client.subscribe(BOOKING_TOPIC,    QoS::AtMostOnce).await.expect("failed to subscribe");
 
 	(client, event_loop)
 }

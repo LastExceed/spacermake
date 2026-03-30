@@ -3,7 +3,7 @@ use maud::*;
 use tap::Pipe;
 use warp::reply::Response;
 
-use crate::web::fab_api::object::Machine;
+use crate::machine::Machine;
 
 pub fn debug(resources: &[Machine]) -> Response {
     let group_map =

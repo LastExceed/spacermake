@@ -1,6 +1,5 @@
 SLAVES_BY_MASTER = "master-slave_relations.toml"
 SLAVE_PROPERTIES = "slave_properties.toml"
-MACHINE_IDS = "fabfire.toml"
 BILLING_LOG = "billinglog.csv"
 MACHINE_LOG = "machinelog.csv"
 DEBUG_LOG = "machinelog_debug.csv"
@@ -9,6 +8,4 @@ DATA_MACHINES = "DataMachines.csv"
 MQTT_HOST = "localhost"
 # MQTT_USERNAME = ""
 # MQTT_PASSWORD = ""
-FABACCESS_HOST = "test.fab-access.org"
-FABACCESS_PORT = 59661
 HIDE_UNBOOKED = true

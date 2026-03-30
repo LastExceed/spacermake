@@ -1,7 +1,6 @@
 use maud::*;
-
+use crate::machine::Machine;
 use super::button;
-use crate::web::fab_api::object::Machine;
 
 pub fn resource(resource: &Machine) -> Markup {
 	let status_class = format!("status-{:?}", resource.usage);

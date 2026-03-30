@@ -3,11 +3,12 @@ use std::time::{Duration, Instant};
 
 use boolinator::Boolinator;
 use colour::{cyan_ln, dark_grey_ln, red_ln};
+use itertools::Itertools;
 use rumqttc::EventLoop;
 use rumqttc::Event::Incoming;
 use rumqttc::Packet::Publish;
 
-use crate::{State, Listener, BOOKING_TOPIC};
+use crate::{State, Listener};
 use crate::utils::get_power_state;
 use crate::utils::logs::{log_debug, machinelog};
 use crate::utils::booking::Booking;
@@ -40,39 +41,14 @@ impl State<Listener> {
     }
 
     async fn handle_payload(&self, topic: &str, payload: &str) -> Result<(), &'static str> {
-        let splits: Result<[_; 3], _> = topic
+        let splits = topic
             .split('/')
-            .collect::<Vec<_>>()
-            .try_into();
+            .collect_array::<3>();
 
-        match splits {
-            Ok(["tele", machine_name, "MARGINS"])
-                => self.on_machine_activity(payload, &machine_name.into()).await,
-
-            _ if topic == BOOKING_TOPIC
-                => self.on_booking_change(payload).await,
-
-            _   => Err("unknown topic")
-        }
-    }
-
-    async fn on_booking_change(&self, payload: &str) -> Result<(), &'static str> {
-        let [machine, user, status] = payload
-            .split(';')
-            .map(String::from)
-            .collect::<Vec<_>>()
-            .try_into()
-            .map_err(|_| "unexpected data count in payload")?;
-
-        match status.as_str() {
-            "booked" => self.try_book(&machine, &user).await?,
-            "released" => self.try_release(&machine).await?,
-            _ => return Ok(()) //ignore other statuses
-        }
-
-        cyan_ln!("{user} {status} {machine}");
-
-        Ok(())
+        let Some(["tele", machine_name, "MARGINS"]) = splits
+        else { return Err("unknown topic") };
+        
+        self.on_machine_activity(payload, &machine_name.into()).await
     }
 
     async fn try_book(&self, machine: &String, user: &str) -> Result<(), &'static str> {
