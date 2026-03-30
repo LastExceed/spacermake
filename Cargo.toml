@@ -20,10 +20,7 @@ futures = "0.3.31"
 colour = "2.1.0"
 config = { version = "0.15.19", features = ["toml"] }
 warp = { version = "0.4.2", features = ["server"] }
-capnp = "0.25.0"
-capnp-rpc = "0.25.0"
 tokio-util = { version = "0.7.18", features = ["compat"] }
-async-native-tls = { version = "0.5", default-features = false, features = ["runtime-tokio"] }
 maud = "0.27"
 anyhow = "1.0.100"
 extend = "1.2.0"

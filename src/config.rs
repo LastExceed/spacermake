@@ -14,7 +14,6 @@ pub mod slave;
 pub struct SpacerConfig {
     pub slaves_by_master: HashMap<String, HashSet<String>>,
     pub slave_properties: HashMap<String, Slave>,
-    pub machine_ids     : HashMap<String, String>,
     pub data_user       : HashMap<String, UserData>,
     pub data_machines   : HashMap<String, MachineData>,
     pub billing_log     : String,
@@ -23,8 +22,6 @@ pub struct SpacerConfig {
     pub mqtt_host       : String,
     pub mqtt_username   : Option<String>,
     pub mqtt_password   : Option<String>,
-    pub fabaccess_host  : String,
-    pub fabaccess_port  : u16,
     pub hide_unbooked   : bool
 }
 
@@ -57,22 +54,6 @@ impl SpacerConfig {
         let slave_properties = open_or_create_file(&config, "SLAVE_PROPERTIES") // slave_properties.toml
             .pipe_as_ref(toml::from_str)
             .expect("failed to load SLAVE_PROPERTIES");
-        
-        let machine_ids = open_or_create_file(&config, "MACHINE_IDS") // /root/fabfire/config.toml
-            .pipe_as_ref(toml::from_str::<toml::Table>)
-            .expect("failed to load MACHINE_IDS")
-            ["readers"]
-            .as_table()
-            .unwrap()
-            .iter()
-            .map(|(_key, value)| {
-                let entry = value.as_table().unwrap();
-                (
-                    entry["machine"].as_str().unwrap().replace("urn:fabaccess:resource:", ""),
-                    entry["id"].as_str().unwrap().into()
-                )
-            })
-            .collect();
         
         let data_user = open_or_create_file(&config, "DATA_USER") // DataUser.csv
             .lines()
@@ -110,7 +91,6 @@ impl SpacerConfig {
         Self {
             slaves_by_master,
             slave_properties,
-            machine_ids,
             data_user,
             data_machines,
             billing_log   : config.get("BILLING_LOG").unwrap(),
@@ -119,8 +99,6 @@ impl SpacerConfig {
             mqtt_host     : config.get("MQTT_HOST").unwrap(),
             mqtt_username : config.get("MQTT_USERNAME").ok(),
             mqtt_password : config.get("MQTT_PASSWORD").ok(),
-            fabaccess_host: config.get("FABACCESS_HOST").unwrap(),
-            fabaccess_port: config.get("FABACCESS_PORT").unwrap(),
             hide_unbooked : config.get("HIDE_UNBOOKED").unwrap()
         }
     }

@@ -14,8 +14,8 @@ use warp::reply::*;
 use warp::*;
 
 use crate::config::SpacerConfig;
+use crate::machine::Machine;
 
-mod fab_api;
 mod page;
 
 pub async fn start(config: Arc<SpacerConfig>) {
@@ -68,7 +68,7 @@ async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerCon
     let target = splits.next();
     let toggle = splits.next() == Some("toggle");
 
-    let resources = fab_api::get_resources(&username, &password, target.filter(|_| toggle), config).await?;
+    let resources: [Machine; 0] = todo!();
 
     let Some(target_urn) = target
     else {

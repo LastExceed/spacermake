@@ -34,12 +34,7 @@ impl State<Announcer> {
 
                 blue_ln!("updating display of {machine}");
 
-                let Some(id) = self.config.machine_ids.get(machine) else {
-                    red_ln!("error: no ID found for {machine}");
-                    return None;
-                };
-
-                let future = self.update_runtime_display(id, booking.total_runtime());
+                let future = self.update_runtime_display(todo!(), booking.total_runtime());
                 Some(future)
             })
             .pipe(join_all)

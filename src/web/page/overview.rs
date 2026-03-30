@@ -2,8 +2,9 @@ use maud::*;
 use tap::Pipe;
 use warp::reply::Response;
 
+use crate::machine::*;
+
 use super::button;
-use crate::web::fab_api::object::{Machine, Usage};
 
 pub fn overview(resources: &[Machine], hide_unbooked: bool) -> Response {
     let filtered =
