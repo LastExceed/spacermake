@@ -1,11 +1,11 @@
 use maud::*;
 
-mod debug;
+// mod debug;
 mod error;
 mod overview;
 mod resource;
 
-pub use debug::debug;
+// pub use debug::debug;
 pub use error::error;
 pub use overview::overview;
 pub use resource::resource;
@@ -31,3 +31,4 @@ fn button(text: &str, dst: &str, class: &str) -> Markup {
         }
     }
 }
+

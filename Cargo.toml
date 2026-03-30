@@ -3,29 +3,23 @@ name = "spacermake"
 version = "0.1.0"
 edition = "2024"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-tokio = { version = "1.49.0", features = ["rt-multi-thread", "fs", "sync"] }
-rumqttc = "0.24.0" # 0.25 requires cmake
-json = "0.12.4"
-boolinator = "2.4.0"
-itertools = "0.14"
-csv = "1.4.0"
-chrono = "0.4.43"
-serde = { version = "1.0.228", features = ["derive"] }
-tap = "1.0.1"
-toml = "0.9.8"
-futures = "0.3.31"
-colour = "2.1.0"
-config = { version = "0.15.19", features = ["toml"] }
-warp = { version = "0.4.2", features = ["server"] }
-tokio-util = { version = "0.7.18", features = ["compat"] }
-maud = "0.27"
-anyhow = "1.0.100"
-extend = "1.2.0"
-strum = { version = "0.27.2", features = ["derive"] }
+anyhow = "1.0.102"
 base64 = "0.22.1"
-
-[build-dependencies]
-capnpc = "0.25.0"
+chrono = "0.4.44"
+csv = "1.4.0"
+dirs = "6.0.0"
+extend = "1.2.0"
+futures = "0.3.32"
+itertools = "0.14"
+log = { version = "0.4.31", features = ["kv"] }
+maud = "0.27"
+parking_lot = "0.12.5"
+rumqttc = "0.24.0" # 0.25 requires cmake
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"
+strum = { version = "0.28.0", features = ["derive"] }
+tap = "1.0.1"
+tokio = { version = "1.52.3", features = ["rt-multi-thread", "fs", "sync"] }
+toml = "1.1.2"
+warp = { version = "0.4.3", features = ["server"] }

@@ -1,0 +1,26 @@
+# diese Datei legt fest welche Master welche Slaves hat.
+# wie der Slave auf dem Master reagiert wird in slave-properties.toml festgelegt 
+
+
+# shelly1-40F520168C99 = Gasmagnetventil
+# shelly1-8CAAB54B9B5B = Luefter Scheissbereich
+# shelly1-40F5201DC7A6 = Kompressor
+# shelly1-E8DB84A1CFF4 = Absaugung Holz
+
+# master =["slave_1", slave_2, ..]
+
+
+Schweissen1 = ["shelly1-40F520168C99", "shelly1-8CAAB54B9B5B", "AbsaugungPlatz1"]
+Schweissen2 = ["shelly1-40F520168C99", "shelly1-8CAAB54B9B5B", "AbsaugungPlatz2"]
+Schweissen3 = ["shelly1-40F520168C99", "shelly1-8CAAB54B9B5B", "AbsaugungPlatz3"]
+LaserSchweissen = ["shelly1-40F520168C99", "shelly1-8CAAB54B9B5B", "AbsaugungPlatz3"]
+SandstrahlGross = ["shelly1-40F5201DC7A6"]
+Plasma = ["shelly1-40F5201DC7A6", "shelly1-8CAAB54B9B5B"]
+FormatSaege = ["shelly1-E8DB84A1CFF4","KlappeHolz2auf","KlappeHolz2zu","Ruettler"]
+Kantenschleifer = ["shelly1-E8DB84A1CFF4","KlappeHolz1auf","KlappeHolz1zu","Ruettler"]
+PlattenSaege = ["shelly1-E8DB84A1CFF4","KlappeHolz3auf","KlappeHolz3zu","Ruettler"]
+LederNaehmaschine = ["shelly1-40F5201DC7A6"]
+SkyLaser9060 = ["AbsaugungLaser","KlappeLaser2auf","KlappeLaser2zu"]
+Kompressor =["shelly1-40F5201DC7A6"]
+Brennofen =["KlappeLaser1auf","KlappeLaser1zu"]
+HauptschalterHinten =["shelly1minig3-e4b3232a9da4"]

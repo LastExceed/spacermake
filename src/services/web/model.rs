@@ -1,9 +1,5 @@
 pub struct Machine {
 	pub name: String,
-	pub id: String,
-	pub description: String,
-	pub category: String,
-	pub urn: String,
 	pub usage: Usage
 }
 

@@ -1,47 +1,64 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use colour::{dark_grey_ln, magenta_ln};
-use futures::future::join3;
-use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
-use state::{Announcer, Listener, State};
+use futures::future::{join, join3};
+use serde::{Deserialize, Serialize};
+use tokio::time::interval;
+use self::cfg::Main;
+use self::services::*;
+use self::services::support::Scope;
 
-use self::config::SpacerConfig;
+mod cfg;
+mod services;
 
-pub mod config;
-mod state;
-mod utils;
-mod web;
-mod machine;
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+struct SupporterId(String);
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+struct LeaderId(String);
 
 #[tokio::main]
 async fn main() {
-	magenta_ln!("===== spacermake =====");
+	log::info!("start");
+	
+	let config = Main::load();
+	config.validate();
 
-	let my_config = Arc::new(SpacerConfig::load());
-	dark_grey_ln!("{my_config:#?}");
-
-	let (client, event_loop) = create_client(&my_config).await;
-	magenta_ln!("start");
-	let listener = State::new(Listener, client, Arc::clone(&my_config));
-	let announcer = listener.duplicate_as(Announcer);
-
+	let sc = services::Collation::new(&config).await;
+	
 	join3(
-		web::start(my_config),
-		announcer.run(),
-		listener.run(event_loop)
-	).await;
+		sc.web.run(),
+		listen(sc.mqtt_read, Arc::clone(&sc.runtime_tracking), sc.support),
+		periodic(sc.machine_control, sc.runtime_tracking)
+	)
+	.await;
 }
 
-async fn create_client(my_config: &SpacerConfig) -> (AsyncClient, EventLoop) {
-	let mut mqttoptions = MqttOptions::new("spacermake", &my_config.mqtt_host, 1883);
-	mqttoptions.set_keep_alive(Duration::from_secs(5));
-	if let (Some(username), Some(password)) = (&my_config.mqtt_username, &my_config.mqtt_password) {
-		mqttoptions.set_credentials(username, password);
+async fn listen(
+	mut mqtt_read: mqtt::read::Service,
+	runtime_tracking: Arc<runtime_tracking::Service>,
+	support: Arc<support::Service>,
+) -> ! {
+	loop {
+		let (leader_id, new_state) = mqtt_read.next_power_state().await;
+
+		runtime_tracking.track(&leader_id, new_state);
+		support.update(&leader_id, Scope::Runtime, new_state).await;
 	}
+}
 
-	let (client, event_loop) = AsyncClient::new(mqttoptions, 10);
-	client.subscribe("tele/+/MARGINS", QoS::AtMostOnce).await.expect("failed to subscribe");
+async fn periodic(machine_control: Arc<machine_control::Service>, runtime_tracking: Arc<runtime_tracking::Service>) -> ! {
+	// gotta figure out how to properly use a DelayQueue instead
+	let mut interval = interval(Duration::from_secs(1));
 
-	(client, event_loop)
+	loop {
+		interval.tick().await;
+
+		join(
+			machine_control.execute_due_shutdowns(),
+			runtime_tracking.refresh_displays()			
+		).await;
+	}
 }
