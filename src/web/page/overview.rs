@@ -1,10 +1,9 @@
 use itertools::Itertools;
 use maud::*;
-use tap::Pipe;
-use warp::reply::Response;
+
+use crate::web::model::{Machine, Usage};
 
 use super::button;
-use crate::{get_config, machine::*};
 
 pub fn overview(resources: &[Machine], hide_unbooked: bool) -> Markup {
     let group_map =

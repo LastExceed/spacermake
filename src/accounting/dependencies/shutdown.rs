@@ -4,7 +4,7 @@ use std::time::{Duration, Instant};
 use parking_lot::RwLock;
 use tap::Pipe;
 
-use crate::app_settings;
+use crate::{ResourceId, app_settings};
 
 pub type Schedule = HashMap<ResourceId, Instant>;
 

@@ -3,6 +3,8 @@ use maud::*;
 use tap::Pipe;
 use warp::reply::Response;
 
+use crate::web::model::Machine;
+
 pub fn debug(resources: &[Machine]) -> Response {
     let group_map =
         resources

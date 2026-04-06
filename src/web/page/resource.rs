@@ -1,5 +1,6 @@
 use maud::*;
-use crate::machine::Machine;
+use crate::web::model::Machine;
+
 use super::button;
 
 pub fn resource(resource: &Machine) -> Markup {

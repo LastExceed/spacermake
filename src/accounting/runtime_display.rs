@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use rumqttc::{AsyncClient, QoS};
 
 use super::BookingIndex;
