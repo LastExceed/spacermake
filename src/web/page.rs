@@ -31,3 +31,4 @@ fn button(text: &str, dst: &str, class: &str) -> Markup {
         }
     }
 }
+

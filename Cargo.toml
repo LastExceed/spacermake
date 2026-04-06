@@ -9,7 +9,6 @@ edition = "2024"
 tokio = { version = "1.49.0", features = ["rt-multi-thread", "fs", "sync"] }
 rumqttc = "0.24.0" # 0.25 requires cmake
 json = "0.12.4"
-boolinator = "2.4.0"
 itertools = "0.14"
 csv = "1.4.0"
 chrono = "0.4.43"
@@ -26,6 +25,9 @@ anyhow = "1.0.100"
 extend = "1.2.0"
 strum = { version = "0.27.2", features = ["derive"] }
 base64 = "0.22.1"
+log = { version = "0.4.29", features = ["kv"] }
+serde_json = "1.0.149"
+parking_lot = "0.12.5"
 
 [build-dependencies]
 capnpc = "0.25.0"

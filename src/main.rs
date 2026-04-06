@@ -1,47 +1,33 @@
 use std::sync::Arc;
-use std::time::Duration;
 
-use colour::{dark_grey_ln, magenta_ln};
-use futures::future::join3;
-use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
-use state::{Announcer, Listener, State};
+use futures::future::join;
+use tap::Pipe;
+use tokio::sync::RwLock;
 
-use self::config::SpacerConfig;
+use self::settings::AppSettings;
 
-pub mod config;
-mod state;
-mod utils;
+mod settings;
 mod web;
-mod machine;
+mod accounting;
+mod mqtt;
+
+pub type ResourceId = String;
 
 #[tokio::main]
 async fn main() {
-	magenta_ln!("===== spacermake =====");
+	log::info!("start");
 
-	let my_config = Arc::new(SpacerConfig::load());
-	dark_grey_ln!("{my_config:#?}");
-
-	let (client, event_loop) = create_client(&my_config).await;
-	magenta_ln!("start");
-	let listener = State::new(Listener, client, Arc::clone(&my_config));
-	let announcer = listener.duplicate_as(Announcer);
-
-	join3(
-		web::start(my_config),
-		announcer.run(),
-		listener.run(event_loop)
+	let (client, event_loop) = mqtt::create_client().await;
+	let client = client.pipe(RwLock::new).pipe(Arc::new);
+	
+	join(
+		web::start(Arc::clone(&client)),
+		// listen power states
+		// runtime displays
+		// scheduled shutdowns
 	).await;
 }
 
-async fn create_client(my_config: &SpacerConfig) -> (AsyncClient, EventLoop) {
-	let mut mqttoptions = MqttOptions::new("spacermake", &my_config.mqtt_host, 1883);
-	mqttoptions.set_keep_alive(Duration::from_secs(5));
-	if let (Some(username), Some(password)) = (&my_config.mqtt_username, &my_config.mqtt_password) {
-		mqttoptions.set_credentials(username, password);
-	}
-
-	let (client, event_loop) = AsyncClient::new(mqttoptions, 10);
-	client.subscribe("tele/+/MARGINS", QoS::AtMostOnce).await.expect("failed to subscribe");
-
-	(client, event_loop)
+fn app_settings() -> &'static AppSettings {
+	todo!()
 }

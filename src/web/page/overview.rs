@@ -4,7 +4,7 @@ use tap::Pipe;
 use warp::reply::Response;
 
 use super::button;
-use crate::machine::*;
+use crate::{get_config, machine::*};
 
 pub fn overview(resources: &[Machine], hide_unbooked: bool) -> Markup {
     let group_map =

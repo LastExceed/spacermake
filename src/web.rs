@@ -5,44 +5,36 @@ use std::sync::Arc;
 use anyhow::anyhow;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
-use colour::*;
-use http::*;
+use http::StatusCode;
 use http::header::*;
 use tap::Pipe;
+use tokio::sync::RwLock;
 use warp::filters::path::FullPath;
 use warp::reply::*;
 use warp::*;
 
-use crate::config::SpacerConfig;
-use crate::machine::Machine;
-
 mod page;
+mod model;
 
-pub async fn start(config: Arc<SpacerConfig>) {
+pub async fn start(state: Arc<RwLock<AppState>>) {
     path::full()
     .and(warp::header::optional(AUTHORIZATION.as_str()))
-    .then(move |path, auth| on_request(path, auth, Arc::clone(&config)))
+    .then(move |path, auth| on_request(path, auth, Arc::clone(&state)))
     .pipe(|main| warp::fs::dir("www").or(main))
     .pipe(warp::serve)
     .run((Ipv4Addr::UNSPECIFIED, 80))
     .await;
 }
 
-async fn on_request(path: FullPath, auth: Option<String>, config: Arc<SpacerConfig>) -> warp::reply::Response {
-	try_handle(path, auth, &config)
+async fn on_request(path: FullPath, auth: Option<String>, state: Arc<RwLock<AppState>>) -> warp::reply::Response {
+    let state_guard = state.read().await;
+    
+	try_handle(path, auth, &*state_guard)
     .await
-    .unwrap_or_else(|err| {
-        if format!("{err:?}") == "(code = invalidCredentials)" {
-            reply().with_auth().into_response()
-        } else {
-            red_ln!("{err:#?}");
-            page::error(&err)
-        }
-    })
+    .unwrap_or_else(|err| page::error(&err))
 }
 
-async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerConfig>) -> anyhow::Result<warp::reply::Response> {
-    yellow_ln!("{}", path.as_str());
+async fn try_handle(path: FullPath, auth: Option<String>, state: &AppState) -> anyhow::Result<warp::reply::Response> {
     let path =
         path
         .as_str()
@@ -50,9 +42,9 @@ async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerCon
         .trim_end_matches('?');
     
     if path == "favicon.ico" {
-        return Ok(http::StatusCode::NO_CONTENT.into_response());
+        return Ok(StatusCode::NO_CONTENT.into_response());
     }
-    
+
     let Some(auth) = auth
     else {
         return Ok(StatusCode::UNAUTHORIZED.with_auth().into_response());
@@ -62,6 +54,8 @@ async fn try_handle(path: FullPath, auth: Option<String>, config: &Arc<SpacerCon
         auth
         .trim_start_matches("Basic ")
         .pipe(decode_auth)?;
+    
+    todo!("check creds");
 
     let mut splits = path.split('/').filter(|split| !split.is_empty());
 
