@@ -128,6 +128,21 @@ impl Main {
 	
 	pub fn validate(&self) -> anyhow::Result<()> {
 		log::trace!(self:?; "validate config");
+		
+		log::trace!("validate supporter configs");
+		let all_dependencies =
+			self
+			.leaders
+			.values()
+			.flat_map(|leader_cfg| &leader_cfg.dependencies_booktime)
+			.chain(
+				self.leaders.values().flat_map(|leader_cfg| &leader_cfg.dependencies_runtime)
+			)
+			.collect_vec();
+
+		for id in self.supporters.keys().filter(|id| !all_dependencies.contains(&id)) {
+			log::warn!("supporter `{}` is not used", id.0);
+		}
 
 		log::trace!("validate leader configs");
 		for (id, cfg) in &self.leaders {
