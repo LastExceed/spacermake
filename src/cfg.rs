@@ -77,7 +77,8 @@ pub struct MqttBroker {
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Supporter {
-	pub topic: String,
+	pub topic_start: String,
+	pub topic_stop: String,
 	pub payload_start: String,
 	pub payload_stop : String,
 	pub trailing_seconds: u64

@@ -7,7 +7,8 @@ pub fn build() -> Main {
 	let [user1, user2, user3, user4] = user_names();
 	
 	let supporter = Supporter {
-		topic: "mqtt/topic/here".to_owned(),
+		topic_start: "mqtt/topic/here".to_owned(),
+		topic_stop: "mqtt/topic/here".to_owned(),
 		payload_start: "mqtt/payload/here".to_owned(),
 		payload_stop: "mqtt/payload/here".to_owned(),
 		trailing_seconds: 0,

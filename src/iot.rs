@@ -25,7 +25,9 @@ impl Controller {
 
 		let device_config = &cfg::INSTANCE.read().await.supporters[supporter];
 
-		let topic = &device_config.topic;
+		let topic = 
+			if new_state { &device_config.topic_start }
+			else         { &device_config.topic_stop };
 		let payload =
 			if new_state { &device_config.payload_start }
 			else         { &device_config.payload_stop };
