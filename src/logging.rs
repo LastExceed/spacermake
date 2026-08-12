@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::sync::{LazyLock, Mutex};
 
 use chrono::{Local, NaiveDate};
-use log::kv::VisitSource;
+use log::kv::{Key, Value, VisitSource};
 use log::*;
 
 use crate::APP_NAME;
@@ -13,25 +13,6 @@ use crate::APP_NAME;
 use self::ansi_escape_codes::SelectGraphicRendition::{self,*};
 
 mod ansi_escape_codes;
-
-pub fn rainbow() {
-	println!("{ForegroundBlack}Black{Reset}");
-	println!("{ForegroundRed}Red{Reset}");
-	println!("{ForegroundGreen}Green{Reset}");
-	println!("{ForegroundYellow}Yellow{Reset}");
-	println!("{ForegroundBlue}Blue{Reset}");
-	println!("{ForegroundMagenta}Magenta{Reset}");
-	println!("{ForegroundCyan}Cyan{Reset}");
-	println!("{ForegroundWhite}White{Reset}");
-	println!("{ForegroundBrightBlack}BrightBlack{Reset}");
-	println!("{ForegroundBrightRed}BrightRed{Reset}");
-	println!("{ForegroundBrightGreen}BrightGreen{Reset}");
-	println!("{ForegroundBrightYellow}BrightYellow{Reset}");
-	println!("{ForegroundBrightBlue}BrightBlue{Reset}");
-	println!("{ForegroundBrightMagenta}BrightMagenta{Reset}");
-	println!("{ForegroundBrightCyan}BrightCyan{Reset}");
-	println!("{ForegroundBrightWhite}BrightWhite{Reset}");
-}
 
 static INSTANCE: Logger = Logger { cache: LazyLock::new(Mutex::default) }; // const default when
 
@@ -140,8 +121,8 @@ impl Log for Logger {
 struct Visitor;
 
 impl VisitSource<'_> for Visitor {
-    fn visit_pair<'kvs>(&mut self, key: log::kv::Key<'kvs>, value: log::kv::Value<'kvs>) -> Result<(), log::kv::Error> {
-        println!("\t{ForegroundMagenta}{key}\t{value}{Reset}");
+    fn visit_pair<'kvs>(&mut self, key: Key<'kvs>, value: Value<'kvs>) -> Result<(), kv::Error> {
+        println!("\t{ForegroundBrightBlack}{key}\t{value}{Reset}");
         Ok(())
     }
 }

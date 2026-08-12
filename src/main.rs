@@ -34,7 +34,6 @@ fn dir() -> PathBuf {
 
 #[tokio::main]
 async fn main() {
-	logging::rainbow();
 	logging::Logger::init();
 	let x = "blabla";
 	log::info!(x:%; "app start");
@@ -57,7 +56,6 @@ async fn main() {
 async fn listen(mut observer: Observer, app: &RwLock<App>) -> ! {
 	log::info!(app:?; "begin listening");
 
-	sleep(Duration::MAX).await;
 	loop {
 		let (leader_id, new_state) = observer.next_power_state().await;
 		log::debug!(leader_id:?, new_state:%; "power state changed");
