@@ -34,9 +34,10 @@ fn dir() -> PathBuf {
 
 #[tokio::main]
 async fn main() {
+	logging::rainbow();
 	logging::Logger::init();
-	
-	log::info!("app start");
+	let x = "blabla";
+	log::info!(x:%; "app start");
 	if !cfg::init().await.unwrap() {
 		log::info!("A config template has been generated (in {}). Customize it, then run again.", cfg::dir().display());
 		log::warn!("Exiting due to missing config");
