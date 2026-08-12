@@ -23,6 +23,8 @@ impl Network {
 	}
 	
 	pub async fn update_running_set(&mut self, mut new_set: HashSet<&SupporterId>) {
+		log::trace!(self:?, new_set:?; "update running set");
+		
 		let now = Instant::now();
 		
 		let cfg_guard = cfg::INSTANCE.read().await;
@@ -31,6 +33,7 @@ impl Network {
 		for id in self.currently_running.extract_if(|id| !new_set.contains(&id)) {
 			let trailing_time = cfg_guard.supporters[&id].trailing_seconds.pipe(Duration::from_secs);
 			let terminus = now + trailing_time;
+			log::debug!("schedule shutdown - supporter: `{}`, delay: {:?}", id.0, trailing_time);
 			self.shutdown_schedule.insert(id, terminus);
 		}
 		
@@ -54,6 +57,8 @@ impl Network {
 	}
 	
 	pub async fn shutdown_due(&mut self) {		
+		// log::trace!("shutdown_due");
+
 		let now = Instant::now();
 		
 		self

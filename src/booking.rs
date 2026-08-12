@@ -31,15 +31,16 @@ impl Registry {
 		else {
 			log::trace!("booking");
 			self.0.insert(target.clone(), Record::new(user_name.clone()));
+			log::info!("`{}` booked `{}`", user_name.0, target.0);
 			return Ok(ToggleOutcome::Booked);
 		};
 
 		if booking.occupant != *user_name {
-			log::trace!("occupied");
+			log::debug!("`{}` failed to book `{}` (occupied)", user_name.0, target.0);
 			return Err(ToggleError::Occupied)
 		}
 		if booking.is_running() {
-			log::trace!("still running");
+			log::debug!("`{}` failed to release `{}` (still running)", user_name.0, target.0);
 			return Err(ToggleError::StillRunning)
 		}
 
@@ -49,6 +50,8 @@ impl Registry {
 			self.0
 			.remove(target)
 			.unwrap(); // we just verified that the entry exists
+		
+		log::info!("`{}` released `{}`", user_name.0, target.0);
 		
 		ToggleOutcome::Released {
 			booked_time: booking.booked_at.elapsed(),

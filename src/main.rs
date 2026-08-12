@@ -58,7 +58,7 @@ async fn listen(mut observer: Observer, app: &RwLock<App>) -> ! {
 
 	loop {
 		let (leader_id, new_state) = observer.next_power_state().await;
-		log::debug!(leader_id:?, new_state:%; "power state changed");
+		log::info!(leader_id:?, new_state:%; "power state changed - leader_id: {}, new_state: {}", leader_id.0, new_state);
 		
 		app.write().await.on_power_activity(&leader_id, new_state).await;
 	}
@@ -149,6 +149,8 @@ impl App {
 	}
 	
 	async fn refresh_runtime_displays(&self) {
+		// log::trace!("refresh_runtime_displays");
+		
 		let times = self.bookings.active_runtimes();
 		self.support.update_screens(times).await;
 	}

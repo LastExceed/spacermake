@@ -23,6 +23,8 @@ pub struct Accountant {
 
 impl Accountant {
 	pub async fn write_bill(&mut self, user_name: &UserName, leader_id: &LeaderId, booked_time: Duration, runtime: Duration, vo_client: &verein_online::ApiClient) -> anyhow::Result<()> {
+		log::trace!(user_name:?, leader_id:?, booked_time:?, runtime:?; "write bill");
+		
 		let data_machines_row = &data_machines::load().await?[leader_id];
 		
 		let machine_is_free_for_all = data_machines_row.artikel_id.0 == 0;

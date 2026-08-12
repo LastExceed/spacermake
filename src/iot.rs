@@ -21,7 +21,7 @@ pub struct Controller(mqtt::Writer);
 
 impl Controller {
 	pub async fn set_power_state(&self, supporter: &SupporterId, new_state: bool) {
-		log::trace!(new_state; "set power state");
+		log::debug!("set power state - supporter: `{}`, new_state: `{}`", supporter.0, new_state);
 
 		let device_config = &cfg::INSTANCE.read().await.supporters[supporter];
 
@@ -101,7 +101,7 @@ fn parse_as_power_state(publish: &Publish) -> Option<(LeaderId, bool)> {
 		return None;
 	};
 
-	log::info!(device_name, new_power_state:? = margins.power_high; "observed machine activity");
+	log::trace!(device_name, new_power_state:? = margins.power_high; "observed machine activity");
 
 	let leader_id = LeaderId(device_name.to_owned());
 	let new_state = margins.power_high.is_on();
