@@ -2,7 +2,7 @@ use std::time::Duration;
 use rumqttc::*;
 use tap::prelude::Pipe;
 
-use crate::{APP_NAME, cfg};
+use crate::cfg;
 
 pub async fn new() -> (Writer, Reader) {
 	log::trace!("create mqtt reader/writer");
@@ -23,7 +23,7 @@ pub async fn new() -> (Writer, Reader) {
 pub fn make_options(broker: &cfg::MqttBroker) -> MqttOptions {
 	log::trace!("make mqtt options");
 
-	let mut options = MqttOptions::new(APP_NAME, &broker.host, 1883);
+	let mut options = MqttOptions::new("spacermake2", &broker.host, 1883);
 	options.set_keep_alive(Duration::from_secs(5));
 
 	if let (Some(username), Some(password)) = (&broker.username, &broker.password) {

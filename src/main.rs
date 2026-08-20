@@ -15,6 +15,7 @@ use self::booking::ToggleOutcome;
 use self::custom::verein_online;
 use self::custom::verein_online::model::UserId;
 use self::iot::Observer;
+use self::web::auth::VerifyLogin;
 
 mod booking;
 mod cfg;
@@ -36,8 +37,45 @@ fn dir() -> PathBuf {
 #[tokio::main]
 async fn main() {
 	logging::Logger::init();
-	let x = "blabla";
-	log::info!(x:%; "app start");
+
+	let admin_username = "christoph.beckmann";
+	let admin_password = "S!M5f^!#otf!sM";
+	let pleb_username = "bristoph.chreckmann";
+	let pleb_password = "tD@o$k0U3m0Y@G";
+	
+	let verein = "Makerspace_Bocholt_gUG";
+	let api = "VerifyLogin";
+	
+	let sys_user = admin_username;
+	let sys_pw_hash = md5::compute(admin_password);
+	
+	let payload = VerifyLogin {
+		user: pleb_username,
+		password: pleb_password,
+		result: "id"
+	};
+
+	println!("{}", serde_json::to_string(&payload).unwrap());
+	
+	let rsp =
+		reqwest
+		::Client
+		::new()
+		.post(format!("https://www.vereinonline.org/{verein}/?api={api}"))
+		.header("Authorization", format!("A/{sys_user}/{sys_pw_hash:x}"))
+		.json(&payload)
+		.send()
+		.await
+		.unwrap()
+		.text()
+		.await
+		.unwrap();
+	
+	println!(">> {rsp}");
+
+	return;
+	
+	log::info!("app start");
 	if !cfg::init().await.unwrap() {
 		log::info!("A config template has been generated (in {}). Customize it, then run again.", cfg::dir().display());
 		log::warn!("Exiting due to missing config");
