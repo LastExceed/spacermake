@@ -50,8 +50,21 @@ impl Network {
 	}
 	
 	pub async fn update_screens(&self, times: impl Iterator<Item = (&LeaderId, Duration)>) {
+		// log::trace!("update screens");
+		
+		let cfg_guard = cfg::INSTANCE.read().await;
+		
 		times
-		.map(|(id, runtime)| self.controller.set_screen_text(id, runtime))
+		.filter_map(|(leader_id, runtime)|
+			cfg_guard
+			.leaders
+			[leader_id]
+			.runtime_display_id
+			.as_ref()
+			.map(|display_id|
+				self.controller.set_screen_text(display_id, runtime)
+			)
+		)
 		.pipe(future::join_all)
 		.await;
 	}

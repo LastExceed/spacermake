@@ -86,10 +86,11 @@ pub struct Supporter {
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Leader {
-	pub description     : String,
-	pub display_category: String,
+	pub description          : String,
+	pub display_category     : String,
 	pub dependencies_booktime: Vec<SupporterId>,
-	pub dependencies_runtime : Vec<SupporterId>
+	pub dependencies_runtime : Vec<SupporterId>,
+	pub runtime_display_id   : Option<RuntimeDisplayId>
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]

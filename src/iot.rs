@@ -35,8 +35,8 @@ impl Controller {
 		self.0.send(topic, payload).await;
 	}
 
-	pub async fn set_screen_text(&self, leader_id: &LeaderId, runtime: Duration) {
-		log::trace!(leader_id:?, runtime:?; "set screen text");
+	pub async fn set_screen_text(&self, display_id: &RuntimeDisplayId, runtime: Duration) {
+		log::trace!(display_id:?, runtime:?; "set screen text");
 
 		let formatted_time = format_time(runtime);
 
@@ -46,7 +46,7 @@ impl Controller {
 		];
 
 		for (route, payload) in messages {
-			let topic = format!("fabreader/{}/display/{route}", leader_id.0);
+			let topic = format!("fabreader/{}/display/{route}", display_id.0);
 			self.0.send(&topic, payload).await;
 		}
 	}

@@ -18,14 +18,16 @@ pub fn build() -> Main {
 		description: "Does things, I think".to_owned(),
 		display_category: "ExcitingMachines".to_owned(),
 		dependencies_booktime: vec![supporter_id1.clone(), supporter_id2.clone()],
-		dependencies_runtime : vec![supporter_id3.clone()]
+		dependencies_runtime : vec![supporter_id3.clone()],
+		runtime_display_id: None
 	};
 	
 	let leader2 = Leader {
 		description: "Makes stuff, I'm told".to_owned(),
 		display_category: "BoringMachines".to_owned(),
 		dependencies_booktime: vec![],
-		dependencies_runtime : vec![supporter_id2.clone()]
+		dependencies_runtime : vec![supporter_id2.clone()],
+		runtime_display_id: Some(RuntimeDisplayId("mini_screen_1".to_owned()))
 	};
 	
 	

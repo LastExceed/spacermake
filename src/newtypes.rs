@@ -22,3 +22,8 @@ pub struct LeaderId(pub String);
 #[repr(transparent)]
 #[serde(transparent)]
 pub struct SupporterId(pub String);
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[repr(transparent)]
+#[serde(transparent)]
+pub struct RuntimeDisplayId(pub String);
