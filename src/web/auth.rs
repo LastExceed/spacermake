@@ -5,15 +5,14 @@ use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use tap::prelude::Conv;
 
-use crate::newtypes::UserName;
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct Credentials {
-	pub username: UserName,
-	pub password: String
+pub struct VerifyLogin<'user, 'pw, 'res> {
+	pub user: &'user str,
+	pub password: &'pw str,
+	pub result: &'res str
 }
 
-pub fn decode_header(header: &str) -> anyhow::Result<Credentials> {
+pub fn decode_header(header: &str) -> anyhow::Result<[String; 2]> {
 	log::trace!(header:%; "decode_header");
 	
 	BASE64_STANDARD
@@ -23,6 +22,5 @@ pub fn decode_header(header: &str) -> anyhow::Result<Credentials> {
 	.ok_or_else(|| anyhow!("couldn't split decoded credentials"))?
 	.conv::<[_; 2]>()
 	.map(str::to_owned)
-	.pipe(|[username, password]| Credentials { username: UserName(username), password })
 	.pipe(Ok)
 }

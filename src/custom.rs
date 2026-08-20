@@ -11,18 +11,15 @@ use crate::cfg;
 use crate::newtypes::{LeaderId, UserName};
 
 use self::data_machines::BillingScope;
-use self::verein_online::model::{Bill, Member, UserId};
+use self::verein_online::model::{Bill, UserId};
 
 pub mod data_machines;
 pub mod verein_online;
 
 #[derive(Debug, Clone, Default)]
-pub struct Accountant {
-	members_cache: MembersCache,
-}
-
+pub struct Accountant;
 impl Accountant {
-	pub async fn write_bill(&mut self, user_name: &UserName, leader_id: &LeaderId, booked_time: Duration, runtime: Duration, vo_client: &verein_online::ApiClient) -> anyhow::Result<()> {
+	pub async fn write_bill(&mut self, user_name: &UserName, user_id: UserId, leader_id: &LeaderId, booked_time: Duration, runtime: Duration, vo_client: &verein_online::ApiClient) -> anyhow::Result<()> {
 		log::trace!(user_name:?, leader_id:?, booked_time:?, runtime:?; "write bill");
 		
 		let data_machines_row = &data_machines::load().await?[leader_id];
@@ -40,8 +37,6 @@ impl Accountant {
 		if machine_is_free_for_all || user_has_free_use_permission {
 			return Ok(());
 		}
-		
-		let user_id = self.members_cache.get_id(user_name, vo_client).await?;
 	
 		let anzahl =
 			match data_machines_row.billing_scope {
@@ -90,31 +85,4 @@ fn open_file(now: chrono::DateTime<Local>) -> io::Result<File> {
 	.create(true)
 	.append(true)
 	.open(path)
-}
-
-#[derive(Debug, Clone, Default)]
-struct MembersCache(Vec<Member>);
-
-impl MembersCache {
-	async fn get_id(&mut self, user_name: &UserName, api_client: &verein_online::ApiClient) -> anyhow::Result<UserId> {
-		if let Some(id) = self.get_cached_id(user_name) {
-			return Ok(id)
-		}
-		
-		self.refresh(api_client).await?;
-		
-		self.get_cached_id(user_name).ok_or_else(|| anyhow::anyhow!("user doesn't exist"))
-	}
-	
-	async fn refresh(&mut self, api_client: &verein_online::ApiClient) -> reqwest::Result<()> {
-		self.0 = api_client.get_members().await?;
-		Ok(())
-	}
-	
-	fn get_cached_id(&self, user_name: &UserName) -> Option<UserId> {
-		self.0
-		.iter()
-		.find(|member| member.name == *user_name)
-		.map(|member| UserId(member.id))
-	}
 }

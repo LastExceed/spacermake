@@ -7,12 +7,13 @@ use std::time::Duration;
 use futures::prelude::*;
 use tap::prelude::Pipe;
 use tokio::sync::RwLock;
-use tokio::time::{interval, sleep};
+use tokio::time::interval;
 
 use crate::newtypes::*;
 
 use self::booking::ToggleOutcome;
 use self::custom::verein_online;
+use self::custom::verein_online::model::UserId;
 use self::iot::Observer;
 
 mod booking;
@@ -82,7 +83,6 @@ async fn periodic(app: &RwLock<App>) -> ! {
 struct App {
 	support: support::Network,
 	bookings: booking::Registry,
-	accountant: custom::Accountant,
 	vo_client: verein_online::ApiClient
 }
 
@@ -93,12 +93,11 @@ impl App {
 		Self {
 			support: support::Network::new(controller),
 			bookings: booking::Registry::default(),
-			accountant: custom::Accountant::default(),
 			vo_client: verein_online::ApiClient::new()
 		}
 	}
 
-	pub async fn on_booking_request(&mut self, leader_id: &LeaderId, user_name: &UserName) -> Result<(), booking::ToggleError> {
+	pub async fn on_booking_request(&mut self, leader_id: &LeaderId, user_name: &UserName, user_id: UserId) -> Result<(), booking::ToggleError> {
 		log::trace!(leader_id:?, user_name:?; "on_toggle_booking_request");
 
 		let outcome = self.bookings.try_toggle(leader_id, user_name)?;
@@ -106,7 +105,7 @@ impl App {
 		self.update_supporters().await;
 
 		if let ToggleOutcome::Released { booked_time, runtime } = outcome {
-			let result = self.accountant.write_bill(user_name, leader_id, booked_time, runtime, &self.vo_client).await;
+			let result = custom::Accountant.write_bill(user_name, user_id, leader_id, booked_time, runtime, &self.vo_client).await;
 			if let Err(error) = result {
 				log::error!(error:?; "failed to write bill");
 			}

@@ -5,9 +5,7 @@ use serde::*;
 use tap::prelude::*;
 
 use crate::cfg;
-use crate::web::auth::Credentials;
-
-use self::model::Member;
+use crate::web::auth::VerifyLogin;
 
 pub mod model;
 
@@ -62,11 +60,17 @@ impl ApiClient {
 		.await
 	}
 
-	pub async fn verify_login(&self, credentials: &Credentials) -> reqwest::Result<Vec<String>> {
-		log::trace!(credentials:?; "verify login");
+	pub async fn verify_login(&self, user: &str, password: &str) -> reqwest::Result<Vec<String>> {
+		log::trace!(user:%, password:%; "verify login");
+		
+		let payload = VerifyLogin {
+			user,
+			password,
+			result: "id"
+		};
 		
 		self
-		.query("VerifyLogin", credentials)
+		.query("VerifyLogin", &payload)
 		.await
 	}
 

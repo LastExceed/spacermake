@@ -204,6 +204,21 @@ impl Main {
 	}
 }
 
+pub async fn insert_if_new(username: &UserName) {
+	let cfg_guard_read = INSTANCE.read().await;
+	
+	if cfg_guard_read.users.contains_key(username) {
+		return;
+	}
+	
+	drop(cfg_guard_read);
+	let mut cfg_guard = INSTANCE.write().await;
+	
+	cfg_guard
+		.users
+		.insert(username.clone(), User::default());
+}
+
 impl Default for Main {
 	fn default() -> Self {
 		template::build()
