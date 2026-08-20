@@ -11,7 +11,7 @@
 
 body {
 	margin: 0;
-	zoom: 1.5;
+	/* zoom: 1.5; */
 }
 
 /* meta.components */
@@ -99,15 +99,32 @@ h3 {
 
 /* resource */
 
-main.resource {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+div.resource-page {
+	/* background: purple; */
+	width: 100dvw;
+	height: 100dvh;
 }
 
-h1 {
-	margin: 200px;
+div.top-bar {
+	/* background: red; */
+	display: flex;
+	flex-direction: row;
+	justify-content: start;
+
 }
+
+div.resource-content {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	/* background: orange; */
+	min-height: 80%;
+}
+
+/* button.status {
+} */
 
 button.status-Occupied { background: red; }
 
@@ -124,4 +141,8 @@ h1.status-Occupied::after,
 
 p.notice::after {
 	content: "Bitte nutze die Kamera-App deines Smartphones/Tablets"
+}
+
+.error-page {
+	background: red;
 }

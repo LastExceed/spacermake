@@ -23,23 +23,30 @@ pub fn render(
 		.is_the_occupant(id, user)
 		.conv::<Status>();
 
-	let style_class = format!("status-{status}");
+	let style_class = format!("status status-{status}");
 
 	html! {
-		div class="top" {
-			div { (button("<--", "", "button-back", true)) }
-			h1 { (id.0) }
-			p { (description) }
+		div class="resource-page" {
+			div class="top-bar" {
+				(button("<--", "", "button-back", true))
+			}
+
+			div class="resource-content" {
+				div class="resource-meta" {
+					h1 { (id.0) }
+					p { (description) }
+				}
+				h1 class=(style_class) { "" } // set via css
+				(button(
+				"",
+				format!("{name}/toggle"),
+					&style_class,
+					has_perm || status == Status::Yours
+				))
+			}
 		}
 
-		h1 class=(style_class) { "" } // set via css
 
-		(button(
-			"",
-			format!("{name}/toggle"),
-			&style_class,
-			has_perm || status == Status::Yours
-		))
 	}
 	.pipe_ref(template)
 }
