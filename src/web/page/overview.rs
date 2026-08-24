@@ -17,12 +17,12 @@ pub fn render(cfg: &cfg::Main, app: &App, user_name: &UserName) -> Response {
 		.sorted_by_key(|(category, _)| *category);
 
 	html! {
-		header {}
+		header .overview {}
 
 		main .overview {
 			details {
 				summary class="fake-button" { "SCAN QR-CODE" }
-				p class="notice" {}
+				p .notice {}
 			}
 
 			@for (category, entries) in to_display {

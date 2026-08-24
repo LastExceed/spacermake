@@ -26,27 +26,26 @@ pub fn render(
 	let style_class = format!("status status-{status}");
 
 	html! {
-		div class="resource-page" {
-			div class="top-bar" {
-				(button("<--", "", "button-back", true))
+		header .resource {
+			(button("<--", "", "button-back", true))
+		}
+		main .resource {
+			div class="resource-meta" {
+				h1 { (id.0) }
+				p .description { (description) }
 			}
-
-			div class="resource-content" {
-				div class="resource-meta" {
-					h1 { (id.0) }
-					p { (description) }
-				}
-				h1 class=(style_class) { "" } // set via css
-				(button(
+			
+			h1 class=(style_class) { "" } // set via css
+			
+			(button(
 				"",
 				format!("{name}/toggle"),
-					&style_class,
-					has_perm || status == Status::Yours
-				))
-			}
+				&style_class,
+				has_perm || status == Status::Yours
+			))
+			
+			div {}
 		}
-
-
 	}
 	.pipe_ref(template)
 }
