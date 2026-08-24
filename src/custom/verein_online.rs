@@ -7,8 +7,6 @@ use tap::prelude::*;
 use crate::cfg;
 use crate::web::auth::VerifyLogin;
 
-use self::model::Member;
-
 pub mod model;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -76,11 +74,11 @@ impl ApiClient {
 		.await
 	}
 
-	pub async fn get_members(&self) -> reqwest::Result<Vec<Member>> {
-		log::trace!("get VO members");
+	// pub async fn get_members(&self) -> reqwest::Result<Vec<Member>> {
+	// 	log::trace!("get VO members");
 		
-		self
-    	.query("GetMembers", &()) // the unit payload here is actually required by VereinOnline
-    	.await
-	}
+	// 	self
+    // 	.query("GetMembers", &()) // the unit payload here is actually required by VereinOnline
+    // 	.await
+	// }
 }

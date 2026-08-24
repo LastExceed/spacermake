@@ -1,8 +1,4 @@
 use serde::*;
-use serde_with::serde_as;
-use serde_with::DisplayFromStr;
-
-use crate::newtypes::UserName;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[repr(transparent)]
@@ -14,15 +10,15 @@ pub struct UserId(pub i32);
 #[serde(transparent)]
 pub struct ArtikelId(pub i32);
 
-#[serde_as]
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
-pub struct Member {
-    #[serde_as(as = "DisplayFromStr")]
-	pub id             : i32,
-	pub name           : UserName,
-	pub fotourl        : String,
-	pub mandatsreferenz: String
-}
+// #[serde_as]
+// #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+// pub struct Member {
+//     #[serde_as(as = "DisplayFromStr")]
+// 	pub id             : i32,
+// 	pub name           : UserName,
+// 	pub fotourl        : String,
+// 	pub mandatsreferenz: String
+// }
 
 #[derive(Debug, Serialize)]
 pub struct Bill {
