@@ -141,7 +141,7 @@ impl Main {
 			)
 			.collect_vec();
 
-		for id in self.supporters.keys().filter(|id| !all_dependencies.contains(&id)) {
+		for id in self.supporters.keys().filter(|id| !all_dependencies.contains(id)) {
 			log::warn!("supporter `{}` is not used", id.0);
 		}
 
