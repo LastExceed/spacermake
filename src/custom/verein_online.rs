@@ -7,6 +7,8 @@ use tap::prelude::*;
 use crate::cfg;
 use crate::web::auth::VerifyLogin;
 
+use self::model::Member;
+
 pub mod model;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
