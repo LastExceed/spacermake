@@ -273,6 +273,7 @@ impl Watcher {
 		}
 		
 		*INSTANCE.write().await = new;
+		log::info!("config reloaded");
 	}
 }
 
