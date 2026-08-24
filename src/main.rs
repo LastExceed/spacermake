@@ -38,42 +38,42 @@ fn dir() -> PathBuf {
 async fn main() {
 	logging::Logger::init();
 
-	let admin_username = "christoph.beckmann";
-	let admin_password = "S!M5f^!#otf!sM";
-	let pleb_username = "bristoph.chreckmann";
-	let pleb_password = "tD@o$k0U3m0Y@G";
+	// let admin_username = "christoph.beckmann";
+	// let admin_password = "S!M5f^!#otf!sM";
+	// let pleb_username = "bristoph.chreckmann";
+	// let pleb_password = "tD@o$k0U3m0Y@G";
 	
-	let verein = "Makerspace_Bocholt_gUG";
-	let api = "VerifyLogin";
+	// let verein = "Makerspace_Bocholt_gUG";
+	// let api = "VerifyLogin";
 	
-	let sys_user = admin_username;
-	let sys_pw_hash = md5::compute(admin_password);
+	// let sys_user = admin_username;
+	// let sys_pw_hash = md5::compute(admin_password);
 	
-	let payload = VerifyLogin {
-		user: pleb_username,
-		password: pleb_password,
-		result: "id"
-	};
+	// let payload = VerifyLogin {
+	// 	user: pleb_username,
+	// 	password: pleb_password,
+	// 	result: "id"
+	// };
 
-	println!("{}", serde_json::to_string(&payload).unwrap());
+	// println!("{}", serde_json::to_string(&payload).unwrap());
 	
-	let rsp =
-		reqwest
-		::Client
-		::new()
-		.post(format!("https://www.vereinonline.org/{verein}/?api={api}"))
-		.header("Authorization", format!("A/{sys_user}/{sys_pw_hash:x}"))
-		.json(&payload)
-		.send()
-		.await
-		.unwrap()
-		.text()
-		.await
-		.unwrap();
+	// let rsp =
+	// 	reqwest
+	// 	::Client
+	// 	::new()
+	// 	.post(format!("https://www.vereinonline.org/{verein}/?api={api}"))
+	// 	.header("Authorization", format!("A/{sys_user}/{sys_pw_hash:x}"))
+	// 	.json(&payload)
+	// 	.send()
+	// 	.await
+	// 	.unwrap()
+	// 	.text()
+	// 	.await
+	// 	.unwrap();
 	
-	println!(">> {rsp}");
+	// println!(">> {rsp}");
 
-	return;
+	// return;
 	
 	log::info!("app start");
 	if !cfg::init().await.unwrap() {

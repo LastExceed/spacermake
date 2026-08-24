@@ -3,7 +3,7 @@
 use std::convert::Infallible;
 use std::net::Ipv4Addr;
 use std::ptr;
-use anyhow::bail;
+use anyhow::{anyhow, bail};
 use itertools::Itertools;
 use tap::prelude::Pipe;
 use tokio::sync::RwLock;
@@ -105,7 +105,8 @@ impl Server {
 			.verify_login(&username, &password)
 			.await?
 			[0]
-			.parse::<i32>()?
+			.parse::<i32>()
+			.map_err(|_| anyhow!("incorrect username/password"))?
 			.pipe(UserId);
 		drop(app_guard);
 

@@ -73,12 +73,4 @@ impl ApiClient {
 		.query("VerifyLogin", &payload)
 		.await
 	}
-
-	pub async fn get_members(&self) -> reqwest::Result<Vec<Member>> {
-		log::trace!("get VO members");
-		
-		self
-    	.query("GetMembers", &()) // the unit payload here is actually required by VereinOnline
-    	.await
-	}
 }
