@@ -11,7 +11,10 @@ use crate::newtypes::{LeaderId, UserName};
 use super::{Status, button, template};
 
 pub fn render(cfg: &cfg::Main, app: &App, user_name: &UserName) -> Response {
-	let to_display = get_machines(app, cfg, user_name);
+	let to_display =
+		get_machines(app, cfg, user_name)
+		.into_iter()
+		.sorted_by_key(|(category, _)| *category);
 
 	html! {
 		header {}
