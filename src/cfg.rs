@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::convert::identity;
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 use std::time::SystemTime;
@@ -200,7 +201,9 @@ impl Main {
 			let role = &self.roles[role_id];
 			role.leaders.iter().map(|leader_id| (leader_id, role.free_use))
 		})
-		.unique()
+		.into_group_map()
+		.into_iter()
+		.map(|(leader_id, free_uses)| (leader_id, free_uses.into_iter().any(identity)))
 	}
 }
 
