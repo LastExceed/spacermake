@@ -105,7 +105,7 @@ impl App {
 		self.update_supporters().await;
 
 		if let ToggleOutcome::Released { booked_time, runtime } = outcome {
-			let result = custom::Accountant.write_bill(user_name, user_id, leader_id, booked_time, runtime, &self.vo_client).await;
+			let result = custom::Accountant.write_bill(user_name, user_id, leader_id, booked_time, runtime).await;
 			if let Err(error) = result {
 				log::error!(error:?; "failed to write bill");
 			}
