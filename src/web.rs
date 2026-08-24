@@ -99,15 +99,19 @@ impl Server {
 		let [username, password] = auth.pipe_as_ref(auth::decode_header)?;
 
 		let app_guard = self.app.read().await;
-		let user_id =
+		let user_id_str =
 			app_guard
 			.vo_client
 			.verify_login(&username, &password)
 			.await?
-			[0]
-			.parse::<i32>()
-			.map_err(|_| anyhow!("incorrect username/password"))?
-			.pipe(UserId);
+			.into_iter()
+			.next()
+			.ok_or(anyhow!("VO empty array"))?;
+		let Ok(user_id) = user_id_str.parse::<i32>().map(UserId)
+		else {
+			return reply().with_auth().into_response().pipe(Ok);
+		};
+			
 		drop(app_guard);
 
 		let username = UserName(username);
