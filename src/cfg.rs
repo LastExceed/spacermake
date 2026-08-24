@@ -251,25 +251,28 @@ impl Watcher {
 				}
 			};
 
-		if modified_at > self.0 {
-			self.0 = modified_at;
-
-			let new =
-				match Main::read_from_file(&path).await {
-					Ok(value) => value,
-					Err(error) => {
-						log::error!(error:?; "could not reload config file");
-						return;
-					}
-				};
-			
-			if let Err(error) = new.validate() {
-				log::error!(error:?; "invalid config");
-			}
-			
-			*INSTANCE.write().await = new;
-			self.0 = modified_at;
+		if modified_at <= self.0 {
+			return;
 		}
+		log::warn!("reloading config");
+		
+		self.0 = modified_at;
+
+		let new =
+			match Main::read_from_file(&path).await {
+				Ok(value) => value,
+				Err(error) => {
+					log::error!(error:?; "could not reload config file");
+					return;
+				}
+			};
+		
+		if let Err(error) = new.validate() {
+			log::error!(error:?; "invalid config");
+			return;
+		}
+		
+		*INSTANCE.write().await = new;
 	}
 }
 
