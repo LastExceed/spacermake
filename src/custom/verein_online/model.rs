@@ -10,6 +10,13 @@ pub struct UserId(pub i32);
 #[serde(transparent)]
 pub struct ArtikelId(pub i32);
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct VerifyLogin<'user, 'pw, 'res> {
+	pub user: &'user str,
+	pub password: &'pw str,
+	pub result: &'res str
+}
+
 // #[serde_as]
 // #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 // pub struct Member {

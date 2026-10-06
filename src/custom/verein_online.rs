@@ -5,7 +5,8 @@ use serde::*;
 use tap::prelude::*;
 
 use crate::cfg;
-use crate::web::auth::VerifyLogin;
+
+use self::model::VerifyLogin;
 
 pub mod model;
 

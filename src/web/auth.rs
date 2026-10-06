@@ -1,16 +1,8 @@
-use serde::Serialize;
 use tap::prelude::Pipe;
 use anyhow::anyhow;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use tap::prelude::Conv;
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct VerifyLogin<'user, 'pw, 'res> {
-	pub user: &'user str,
-	pub password: &'pw str,
-	pub result: &'res str
-}
 
 pub fn decode_header(header: &str) -> anyhow::Result<[String; 2]> {
 	log::trace!(header:%; "decode_header");
