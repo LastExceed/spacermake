@@ -1,5 +1,6 @@
 #![allow(clippy::absolute_paths, reason = "warp")]
 
+use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::Ipv4Addr;
 use std::ptr;
@@ -37,6 +38,7 @@ pub async fn host(app: &RwLock<App>) -> ! {
 	let server =
 		Server {
 			app: unsafe { extend_lifetime(app) },
+			auth_cache: RwLock::default()
 		};
 
 	// SAFETY:
@@ -82,9 +84,45 @@ fn routes(server_static: &'static Server) -> impl Clone + Filter<Extract=impl Re
 
 struct Server {
 	app: &'static RwLock<App>,
+	auth_cache: RwLock<HashMap<UserName, (UserId, String)>>
 }
 
 impl Server {
+	async fn try_auth(&self, username: &UserName, password: &str) -> anyhow::Result<UserId> {
+		let read_guard = self.auth_cache.read().await;
+		
+		if let Some((id, pw)) = read_guard.get(username) && pw == password {
+			return Ok(id.clone());
+		}
+		
+		drop(read_guard);
+		
+		let user_id =
+			self
+			.app
+			.read()
+			.await
+			.vo_client
+			.verify_login(&username.0, password)
+			.await?
+			.into_iter()
+			.next()
+			.ok_or(anyhow!("VO empty array"))?
+			.parse::<i32>()?
+			.pipe(UserId);
+		
+		self
+		.auth_cache
+		.write()
+		.await
+		.insert(
+			username.clone(),
+			(user_id, password.to_owned())
+		);
+		
+		Ok(user_id)
+	}
+	
 	async fn on_request(&self, path: FullPath, auth: String) -> Response {
 		log::trace!(path:?, auth:%; "handle web request");
 
@@ -97,24 +135,8 @@ impl Server {
 	async fn try_handle(&self, path: FullPath, auth: String) -> anyhow::Result<Response> {
 		let path_decoded = urlencoding::decode(path.as_str())?;
 		let [username, password] = auth.pipe_as_ref(auth::decode_header)?;
-
-		let app_guard = self.app.read().await;
-		let user_id_str =
-			app_guard
-			.vo_client
-			.verify_login(&username, &password)
-			.await?
-			.into_iter()
-			.next()
-			.ok_or(anyhow!("VO empty array"))?;
-		let Ok(user_id) = user_id_str.parse::<i32>().map(UserId)
-		else {
-			return reply().with_auth().into_response().pipe(Ok);
-		};
-			
-		drop(app_guard);
-
 		let username = UserName(username);
+		let user_id = self.try_auth(&username, &password).await?;
 		cfg::insert_if_new(&username).await;
 
 		let mut segments = split_segments(&path_decoded);
